@@ -91,12 +91,21 @@
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3) !important;
   opacity: 0 !important;
   visibility: hidden !important;
-  transition: opacity 200ms ease-out, visibility 200ms ease-out !important;
+  transition: opacity 200ms ease-out 100ms, visibility 200ms ease-out 100ms !important;
 }
 
-.group:hover .sidebar-tooltip {
+.group:hover .sidebar-tooltip,
+.tooltip-container:hover .sidebar-tooltip,
+.sidebar-tooltip:hover {
   opacity: 1 !important;
   visibility: visible !important;
+  transition: opacity 150ms ease-out, visibility 150ms ease-out !important;
+}
+
+/* Hide main tooltip when hovering over plus button */
+.plus-button-container:hover ~ .sidebar-tooltip {
+  opacity: 0 !important;
+  visibility: hidden !important;
 }
 
 /* Link hover transitions */
@@ -107,6 +116,151 @@
 
 .nav-link:hover {
   transform: translateX(2px) translateZ(0);
+}
+
+/* Perfect icon centering for collapsed sidebar */
+.sidebar-collapsed {
+  width: 64px !important; /* Fixed width to prevent flickering */
+  min-width: 64px !important;
+  max-width: 64px !important;
+  overflow: visible !important;
+  flex-shrink: 0 !important;
+}
+
+.sidebar-collapsed .nav-link,
+.sidebar-collapsed button.nav-link {
+  justify-content: center !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  width: 44px !important; /* Fixed nav-link width */
+  margin: 0 auto !important;
+}
+
+.sidebar-collapsed .nav-link:hover,
+.sidebar-collapsed button.nav-link:hover {
+  transform: none !important; /* Disable hover transform to prevent flickering */
+}
+
+.sidebar-collapsed .nav-link svg,
+.sidebar-collapsed button.nav-link svg {
+  margin: 0 !important;
+}
+
+/* Ensure tooltip positioning is correct for centered icons */
+.sidebar-collapsed .sidebar-tooltip {
+  left: calc(100% + 8px) !important;
+  margin-left: 0 !important;
+  min-width: 180px !important;
+  max-width: 250px !important;
+  z-index: 60 !important;
+  pointer-events: none !important; /* Prevent tooltip from affecting layout */
+}
+
+/* Add invisible bridge between icon and tooltip */
+.sidebar-collapsed .tooltip-container::before {
+  content: '';
+  position: absolute;
+  left: 100%;
+  top: 0;
+  width: 12px;
+  height: 100%;
+  z-index: 59;
+  pointer-events: none !important;
+}
+
+/* Tooltip link styles */
+.sidebar-tooltip a {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.sidebar-tooltip a:hover {
+  text-decoration: none;
+}
+
+/* Plus tooltip styles */
+.plus-tooltip {
+  position: absolute !important;
+  left: calc(100% + 8px) !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  background-color: #000 !important;
+  color: #fff !important;
+  padding: 6px 10px !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  white-space: nowrap !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3) !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transition: opacity 150ms ease-out 50ms, visibility 150ms ease-out 50ms !important;
+  z-index: 70 !important;
+  pointer-events: none !important; /* Prevent tooltip from affecting layout */
+}
+
+.group\/plus:hover .plus-tooltip {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transition: opacity 150ms ease-out, visibility 150ms ease-out !important;
+}
+
+/* Smooth dropdown animations */
+.animate-dropdown-enter {
+  animation: dropdownSlideIn 0.3s ease-out forwards;
+  overflow: hidden;
+}
+
+@keyframes dropdownSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 120px;
+  }
+}
+
+/* Prevent dropdown flickering */
+.dropdown-container {
+  position: relative;
+}
+
+.dropdown-container .dropdown-content {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 50;
+}
+
+/* Hover-based dropdown transitions */
+.dropdown-container {
+  transition: all 0.2s ease-out;
+}
+
+.dropdown-container:hover .dropdown-content {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-content {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: opacity 0.2s ease-out, visibility 0.2s ease-out, transform 0.2s ease-out;
+}
+
+/* Arrow rotation animation */
+.dropdown-arrow {
+  transition: transform 0.2s ease-out;
+}
+
+.dropdown-open .dropdown-arrow {
+  transform: rotate(90deg);
 }
 
 /* Ensure focus state is maintained */
