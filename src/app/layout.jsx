@@ -1,10 +1,10 @@
-import { Poppins } from "next/font/google";
+import { Figtree } from "next/font/google";
 import "./globals.css";
 import { SidebarProvider } from "../contexts/SidebarContext";
 import MainLayout from "../components/layout/MainLayout";
 
-const poppins = Poppins({
-  variable: "--font-poppins",
+const figtree = Figtree({
+  variable: "--font-figtree",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
 });
@@ -18,7 +18,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${poppins.variable} font-poppins antialiased`}
+        className={`${figtree.variable} font-figtree antialiased`}
       >
         <SidebarProvider>
           <MainLayout>

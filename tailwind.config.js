@@ -8,7 +8,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        poppins: ['var(--font-poppins)', 'sans-serif'],
+        figtree: ['var(--font-figtree)', 'sans-serif'],
       },
       colors: {
         primary: 'var(--color-primary)',
@@ -17,6 +17,10 @@ export default {
         'text-primary': 'var(--color-text-primary)',
         accent: 'var(--color-accent)',
         hover: 'var(--color-hover)',
+        green: 'var(--color-green)',
+        red: 'var(--color-red)',
+        black: 'var(--color-black)',
+        'icon-bg': 'var(--color-icon-bg)',
       },
     },
   },

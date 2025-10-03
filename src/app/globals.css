@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 * {
-  font-family: var(--font-poppins), 'Poppins', sans-serif;
+  font-family: var(--font-figtree), "Figtree", sans-serif;
 }
 
 @theme {
@@ -11,4 +11,8 @@
   --color-text-primary: #ffffff;
   --color-accent: #9381ff;
   --color-hover: #726d9a;
+  --color-green: #4adcb3;
+  --color-red: #e61655;
+  --color-black: #191521;
+  --color-icon-bg: #322f36;
 }

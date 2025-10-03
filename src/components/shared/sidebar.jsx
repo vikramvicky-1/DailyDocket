@@ -68,6 +68,12 @@ const Sidebar = ({ isExpanded, setIsExpanded, isMobile }) => {
           url: "/add-expenses",
           icon: LuPlus,
         },
+        {
+          name: "Manage Categories",
+          path: "/(main)/manage-categories",
+          url: "/manage-categories",
+          icon: LuPlus,
+        },
       ],
     },
     {
@@ -93,14 +99,15 @@ const Sidebar = ({ isExpanded, setIsExpanded, isMobile }) => {
   // Effect to keep dropdowns open when their main link or sub-items are active
   useEffect(() => {
     if (isClient && isExpanded) {
-      menuItems.forEach(item => {
+      menuItems.forEach((item) => {
         if (item.hasDropdown && item.dropdownItems) {
           // Check if main link is active OR any sub-item is active
-          const isMainLinkActive = pathname === item.path || pathname === item.url;
-          const hasActiveSubItem = item.dropdownItems.some(subItem => 
-            pathname === subItem.url || pathname === subItem.path
+          const isMainLinkActive =
+            pathname === item.path || pathname === item.url;
+          const hasActiveSubItem = item.dropdownItems.some(
+            (subItem) => pathname === subItem.url || pathname === subItem.path
           );
-          
+
           if (isMainLinkActive || hasActiveSubItem) {
             setDropdownState(item.name, true);
           } else {
@@ -110,7 +117,6 @@ const Sidebar = ({ isExpanded, setIsExpanded, isMobile }) => {
       });
     }
   }, [pathname, isClient, isExpanded]);
-
 
   // Prevent hydration mismatch by not rendering interactive elements until client-side
   if (!isClient) {
@@ -235,10 +241,7 @@ const Sidebar = ({ isExpanded, setIsExpanded, isMobile }) => {
           };
 
           return (
-            <div 
-              key={item.path} 
-              className="relative"
-            >
+            <div key={item.path} className="relative">
               <div className="relative group tooltip-container">
                 <Link
                   href={item.url}
@@ -277,7 +280,7 @@ const Sidebar = ({ isExpanded, setIsExpanded, isMobile }) => {
                     >
                       <LuPlus size={12} className="text-white" />
                     </Link>
-                    
+
                     {/* Plus tooltip */}
                     <div className="plus-tooltip">
                       {item.dropdownItems[0]?.name || `Add ${item.name}`}
@@ -300,7 +303,8 @@ const Sidebar = ({ isExpanded, setIsExpanded, isMobile }) => {
                 <div className="ml-4 mt-1 space-y-1 animate-dropdown-enter">
                   {item.dropdownItems.map((subItem) => {
                     const SubIcon = subItem.icon;
-                    const isSubActive = pathname === subItem.url || pathname === subItem.path;
+                    const isSubActive =
+                      pathname === subItem.url || pathname === subItem.path;
 
                     const handleSubClick = (e) => {
                       if (isClient && isMobile) {
