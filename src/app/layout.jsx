@@ -2,6 +2,7 @@ import { Figtree } from "next/font/google";
 import "./globals.css";
 import { SidebarProvider } from "../contexts/SidebarContext";
 import MainLayout from "../components/layout/MainLayout";
+import HydrationWarningSupressor from "../components/HydrationWarningSupressor";
 
 const figtree = Figtree({
   variable: "--font-figtree",
@@ -19,12 +20,13 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body
         className={`${figtree.variable} font-figtree antialiased`}
+        suppressHydrationWarning={true}
       >
-        <SidebarProvider>
-          <MainLayout>
-            {children}
-          </MainLayout>
-        </SidebarProvider>
+        <HydrationWarningSupressor>
+          <SidebarProvider>
+            <MainLayout>{children}</MainLayout>
+          </SidebarProvider>
+        </HydrationWarningSupressor>
       </body>
     </html>
   );
