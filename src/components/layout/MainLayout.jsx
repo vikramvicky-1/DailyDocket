@@ -9,39 +9,38 @@ const MainLayout = ({ children }) => {
   const { sidebarExpanded, isMobile, isClient, toggleSidebar } = useSidebar();
 
   return (
-    <div className={`min-h-screen bg-primary ${isClient ? 'hydration-safe' : 'hydration-loading'}`}>
-      <Navbar 
+    <div
+      className={`min-h-screen bg-primary ${
+        isClient ? "hydration-safe" : "hydration-loading"
+      }`}
+    >
+      <Navbar
         onMenuClick={toggleSidebar}
         isMobile={isMobile}
+        isMenuOpen={sidebarExpanded}
       />
       <div className="flex">
-        <Sidebar 
-          isExpanded={sidebarExpanded} 
+        <Sidebar
+          isExpanded={sidebarExpanded}
           setIsExpanded={toggleSidebar}
           isMobile={isMobile}
         />
-        <main 
+        <main
           className={`flex-1 layout-transition main-content ${
-            isMobile 
-              ? "ml-0" 
-              : sidebarExpanded 
-                ? "ml-[280px]" 
-                : "ml-16"
+            isMobile ? "ml-0" : sidebarExpanded ? "ml-[280px]" : "ml-16"
           }`}
           style={{
             // Prevent layout shift during hydration
-            minHeight: 'calc(100vh - 62px)'
+            minHeight: "calc(100vh - 62px)",
           }}
         >
-          <div className="p-4 md:p-8">
-            {children}
-          </div>
+          <div className="p-4 md:p-8">{children}</div>
         </main>
       </div>
-      
+
       {/* Mobile overlay */}
       {isMobile && sidebarExpanded && (
-        <div 
+        <div
           className="fixed inset-0 mobile-overlay z-30 md:hidden"
           onClick={toggleSidebar}
         />
