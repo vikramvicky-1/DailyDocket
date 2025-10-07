@@ -2,7 +2,7 @@
 
 const SalesTableSkeleton = () => {
   return (
-    <div className="bg-secondary p-4 sm:p-6 rounded-xl flex flex-col h-full animate-pulse">
+    <div className="bg-secondary p-4 sm:p-6 rounded-xl flex flex-col h-[calc(100vh-95px)] animate-pulse">
       {/* 1. STATIC HEADER SECTION SKELETON */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0 pb-4">
         {/* Small screens: heading and export on same line */}
