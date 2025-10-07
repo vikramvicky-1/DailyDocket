@@ -145,7 +145,7 @@ const ExpensesPage = () => {
   };
 
   return (
-    <div className="w-full max-w-full h-[calc(100vh-95px)]">
+    <div className="w-full max-w-full">
       {/* Page Header */}
       <div className="mb-6 space-y-4">
         {/* Title and Add Button Row - Always together */}

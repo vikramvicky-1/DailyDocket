@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import DashboardCard from "../components/ui/dashboardCard";
 import DashboardCardSkeleton from "../components/ui/DashboardCardSkeleton";
+import { useSidebar } from "../contexts/SidebarContext";
 import { LuShoppingCart, LuTrendingUp, LuUsers } from "react-icons/lu";
 import { RiMoneyRupeeCircleFill } from "react-icons/ri";
 import { BsCashStack } from "react-icons/bs";
@@ -12,6 +13,7 @@ import { LiaChartBarSolid } from "react-icons/lia";
 const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState(null);
+  const { sidebarExpanded, isMobile } = useSidebar();
 
   // Simulate data loading
   useEffect(() => {
@@ -43,7 +45,19 @@ const DashboardPage = () => {
     <div className="text-text-primary">
       <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
       {/* Dashboard Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div
+        className={`
+        grid gap-4 sm:gap-6 
+        transition-all duration-300 ease-in-out
+        ${
+          isMobile
+            ? "grid-cols-1 justify-items-center"
+            : sidebarExpanded
+            ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-4 justify-items-center lg:justify-items-start"
+            : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 justify-items-center lg:justify-items-start"
+        }
+      `}
+      >
         {loading ? (
           // Skeleton Loading State
           <>

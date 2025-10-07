@@ -6,14 +6,17 @@ const DashboardCardSkeleton = ({ className = "" }) => {
   return (
     <div
       className={`
-        w-[268px] h-[155px] 
+        w-full lg:w-auto lg:min-w-[270px] lg:max-w-[280px]
+        min-h-[155px] lg:h-[155px]
+        h-auto 
         bg-secondary 
         rounded-[20px] 
-        p-3 
+        p-3 sm:p-4 lg:p-3
         flex flex-col 
         gap-4 
         shadow-lg
         animate-pulse
+        transition-all duration-300 ease-in-out
         ${className}
       `}
     >
@@ -49,7 +52,7 @@ const DashboardCardSkeleton = ({ className = "" }) => {
 const DashboardCardSkeletonGrid = ({ count = 4, className = "" }) => {
   return (
     <div
-      className={`grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 ${className}`}
+      className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 transition-all duration-300 ease-in-out ${className}`}
     >
       {Array.from({ length: count }).map((_, index) => (
         <DashboardCardSkeleton key={index} />

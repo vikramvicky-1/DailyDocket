@@ -38,13 +38,16 @@ const DashboardCard = ({
   return (
     <div
       className={`
-        w-[268px] h-[155px] 
+        w-full lg:w-auto lg:min-w-[270px] lg:max-w-[280px]
+        min-h-[155px] lg:h-[155px]
+        h-auto
         bg-secondary 
         rounded-[20px] 
-        p-3 
+        p-3 sm:p-4 lg:p-3
         flex flex-col 
         gap-4 
         shadow-lg
+        transition-all duration-300 ease-in-out
         ${className}
       `}
     >
@@ -53,27 +56,34 @@ const DashboardCard = ({
         {/* Icon Container */}
         <div
           className={`
-            w-10 h-10 
+            w-10 h-10 sm:w-12 sm:h-12 lg:w-10 lg:h-10
             ${iconBgColor} 
             rounded-[25.33px] 
             flex items-center justify-center 
             p-2
+            transition-all duration-300 ease-in-out
           `}
         >
-          {icon && React.cloneElement(icon, { size: 24, className: iconColor })}
+          {icon &&
+            React.cloneElement(icon, {
+              size: 24,
+              className: `${iconColor} sm:scale-110 lg:scale-100 transition-transform duration-300`,
+            })}
         </div>
       </div>
 
       {/* Card Data Container */}
       <div className="flex flex-col gap-1 flex-1">
         {/* Title */}
-        <h3 className="text-sm font-medium text-text-primary leading-tight">
+        <h3 className="text-sm sm:text-base lg:text-sm font-medium text-text-primary leading-tight">
           {title}
         </h3>
 
         {/* Value with Trend */}
-        <div className="flex items-center gap-2">
-          <div className={`text-2xl font-bold ${valueColor} leading-tight`}>
+        <div className="flex items-center gap-2 flex-wrap">
+          <div
+            className={`text-xl sm:text-2xl lg:text-2xl font-bold ${valueColor} leading-tight`}
+          >
             {formatValue(value)}
           </div>
 
@@ -90,7 +100,7 @@ const DashboardCard = ({
 
         {/* Subtitle */}
         {subtitle && (
-          <p className="text-xs text-text-primary leading-tight mt-1">
+          <p className="text-xs sm:text-sm lg:text-xs text-text-primary leading-tight mt-1">
             {subtitle}
           </p>
         )}

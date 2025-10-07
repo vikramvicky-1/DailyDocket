@@ -14,11 +14,7 @@ const MainLayout = ({ children }) => {
         isClient ? "hydration-safe" : "hydration-loading"
       }`}
     >
-      <Navbar
-        onMenuClick={toggleSidebar}
-        isMobile={isMobile}
-        isMenuOpen={sidebarExpanded}
-      />
+      <Navbar onMenuClick={toggleSidebar} isMobile={isMobile} />
       <div className="flex">
         <Sidebar
           isExpanded={sidebarExpanded}
@@ -34,7 +30,21 @@ const MainLayout = ({ children }) => {
             minHeight: "calc(100vh - 62px)",
           }}
         >
-          <div className="p-4 md:p-8">{children}</div>
+          <div
+            className={`
+            p-4 
+            ${
+              isMobile
+                ? "md:p-6"
+                : sidebarExpanded
+                ? "md:p-6 lg:p-8"
+                : "md:p-6 lg:p-8 xl:p-10"
+            } 
+            transition-all duration-300 ease-in-out
+          `}
+          >
+            {children}
+          </div>
         </main>
       </div>
 

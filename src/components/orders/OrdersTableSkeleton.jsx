@@ -40,7 +40,7 @@ const OrdersTableSkeleton = () => {
 
         {/* Table Body Skeleton */}
         <div className="space-y-4 lg:space-y-0">
-          {[...Array(6)].map((_, index) => (
+          {[...Array(8)].map((_, index) => (
             <div
               key={index}
               className="block p-4 rounded-lg bg-secondary border-b border-gray-600/60 lg:grid lg:grid-cols-10 lg:gap-4 lg:p-4 lg:border-b lg:border-gray-600/60 lg:rounded-none lg:bg-transparent text-sm text-text-primary"
