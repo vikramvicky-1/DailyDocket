@@ -56,15 +56,13 @@ const CategoryFilter = ({ selectedCategory, onCategoryChange }) => {
       </button>
 
       {isOpen && (
-        <div className="absolute top-full mt-1 left-0 right-0 bg-tertiary border border-gray-600 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+        <div className="absolute top-full mt-1 left-0 right-0 bg-primary border border-gray-600 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto custom-scrollbar">
           {categoryOptions.map((category) => (
             <button
               key={category}
               onClick={() => handleCategorySelect(category)}
-              className={`w-full text-left px-3 py-2 text-sm hover:bg-secondary transition-colors ${
-                selectedCategory === category
-                  ? "bg-accent/20 text-accent"
-                  : "text-white"
+              className={`w-full text-left px-3 py-2 text-sm text-text-primary hover:bg-tertiary transition-colors ${
+                selectedCategory === category ? "bg-tertiary" : ""
               }`}
             >
               {category}

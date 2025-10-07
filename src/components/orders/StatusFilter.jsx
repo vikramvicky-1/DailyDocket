@@ -49,13 +49,13 @@ const StatusFilter = ({ selectedStatus, onStatusChange, className = "" }) => {
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-form-bg border border-gray-600 rounded-lg shadow-lg z-50 overflow-hidden">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-primary border border-gray-600 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto custom-scrollbar">
           {statusOptions.map((option) => (
             <button
               key={option}
               onClick={() => handleStatusSelect(option)}
-              className={`w-full px-4 py-3 text-left text-sm text-text-primary hover:bg-secondary transition-colors ${
-                selectedStatus === option ? "bg-secondary" : ""
+              className={`w-full px-4 py-3 text-left text-sm text-text-primary hover:bg-tertiary transition-colors ${
+                selectedStatus === option ? "bg-tertiary" : ""
               }`}
             >
               {option}

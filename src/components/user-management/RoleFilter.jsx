@@ -33,28 +33,28 @@ const RoleFilter = ({ selectedRole, onRoleChange }) => {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between px-4 py-2.5 bg-form-bg text-text-primary rounded-lg border border-gray-600 hover:border-accent transition-colors min-w-[140px] text-sm"
+        className="flex items-center justify-between min-w-[120px] px-3 py-2 bg-tertiary text-white text-sm rounded-lg border border-gray-600 hover:border-accent transition-colors"
       >
         <span className="truncate">{displayText}</span>
         <LuChevronDown
           size={16}
-          className={`ml-2 flex-shrink-0 transition-transform duration-200 ${
+          className={`ml-2 transition-transform duration-200 flex-shrink-0 ${
             isOpen ? "rotate-180" : ""
           }`}
         />
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-form-bg border border-gray-600 rounded-lg shadow-lg z-50 overflow-hidden">
+        <div className="absolute top-full mt-1 left-0 right-0 bg-primary border border-gray-600 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto custom-scrollbar">
           {roleOptions.map((role) => (
             <button
               key={role}
               onClick={() => handleRoleSelect(role)}
-              className={`w-full px-4 py-3 text-left text-sm text-text-primary hover:bg-secondary transition-colors ${
-                selectedRole === role ? "bg-secondary" : ""
+              className={`w-full text-left px-3 py-2 text-sm text-text-primary hover:bg-tertiary transition-colors ${
+                selectedRole === role ? "bg-tertiary" : ""
               }`}
             >
-              {role === "All" ? "Select Role" : role}
+              {role === "All" ? "All" : role}
             </button>
           ))}
         </div>

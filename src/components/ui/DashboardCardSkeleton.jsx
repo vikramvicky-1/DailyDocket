@@ -20,8 +20,8 @@ const DashboardCardSkeleton = ({ className = "" }) => {
       {/* Header with Icon Skeleton */}
       <div className="flex items-start justify-between">
         {/* Icon Container Skeleton */}
-        <div className="w-10 h-10 bg-tertiary rounded-[25.33px] flex items-center justify-center">
-          <div className="w-6 h-6 bg-gray-600 rounded"></div>
+        <div className="w-10 h-10 bg-accent rounded-[25.33px] flex items-center justify-center">
+          <div className="w-6 h-6 bg-tertiary rounded"></div>
         </div>
       </div>
 
@@ -36,7 +36,7 @@ const DashboardCardSkeleton = ({ className = "" }) => {
           <div className="h-8 bg-tertiary rounded w-20"></div>
 
           {/* Trend Indicator Skeleton */}
-          <div className="h-6 bg-tertiary rounded-[15px] w-12"></div>
+          <div className="h-6 bg-black rounded-[15px] w-12"></div>
         </div>
 
         {/* Subtitle Skeleton */}

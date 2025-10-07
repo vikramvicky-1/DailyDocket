@@ -141,20 +141,42 @@ const OrdersPage = () => {
   return (
     <div className="w-full max-w-full">
       {/* Page Header */}
-      <div className="flex mb-6 flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
-        <h1 className="text-2xl font-bold mb-6 text-text-primary">Orders</h1>
-        <div className="flex items-center space-x-4">
-          <StatusFilter
-            selectedStatus={selectedStatus}
-            onStatusChange={handleStatusChange}
-          />
+      <div className="mb-6 space-y-4">
+        {/* Title and Add Button Row - Always together */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-text-primary">Orders</h1>
+
+          {/* Controls Row for Medium+ screens - Filter + Add Button */}
+          <div className="hidden md:flex items-center space-x-4">
+            <StatusFilter
+              selectedStatus={selectedStatus}
+              onStatusChange={handleStatusChange}
+            />
+            <button
+              onClick={handleAddOrder}
+              className="flex items-center space-x-2 px-6 py-2.5 bg-accent hover:bg-accent/90 text-white rounded-lg transition-colors font-medium"
+            >
+              <LuPlus size={18} />
+              <span>Add Order</span>
+            </button>
+          </div>
+
+          {/* Add Button for Small screens - Always at top right */}
           <button
             onClick={handleAddOrder}
-            className="flex items-center space-x-2 px-2 md:px-6 py-2.5 md:py-3 bg-accent hover:bg-accent/90 text-white rounded-lg transition-colors font-medium text-sm md:text-base"
+            className="md:hidden flex items-center space-x-2 px-2 py-2.5 bg-accent hover:bg-accent/90 text-white rounded-lg transition-colors font-medium text-sm"
           >
             <LuPlus size={18} />
             <span>Add Order</span>
           </button>
+        </div>
+
+        {/* Filters Row for Small screens - Below title */}
+        <div className="md:hidden flex items-center justify-start">
+          <StatusFilter
+            selectedStatus={selectedStatus}
+            onStatusChange={handleStatusChange}
+          />
         </div>
       </div>
 

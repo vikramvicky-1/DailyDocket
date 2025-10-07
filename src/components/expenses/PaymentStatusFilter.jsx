@@ -45,15 +45,13 @@ const PaymentStatusFilter = ({ selectedStatus, onStatusChange }) => {
       </button>
 
       {isOpen && (
-        <div className="absolute top-full mt-1 left-0 right-0 bg-tertiary border border-gray-600 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+        <div className="absolute top-full mt-1 left-0 right-0 bg-primary border border-gray-600 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto custom-scrollbar">
           {statusOptions.map((status) => (
             <button
               key={status}
               onClick={() => handleStatusSelect(status)}
-              className={`w-full text-left px-3 py-2 text-sm hover:bg-secondary transition-colors ${
-                selectedStatus === status
-                  ? "bg-accent/20 text-accent"
-                  : "text-white"
+              className={`w-full text-left px-3 py-2 text-sm text-text-primary hover:bg-tertiary transition-colors ${
+                selectedStatus === status ? "bg-tertiary" : ""
               }`}
             >
               {status}
