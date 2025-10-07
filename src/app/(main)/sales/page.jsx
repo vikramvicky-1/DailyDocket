@@ -143,7 +143,7 @@ const SalesPage = () => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full h-[calc(100vh-95px)] flex flex-col">
       {/* Page Header */}
       <div className="mb-6">
         {/* Title and Add Button Row (always together) */}
