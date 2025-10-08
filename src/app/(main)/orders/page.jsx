@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { LuPlus } from "react-icons/lu";
 import OrdersTable from "../../../components/orders/OrdersTable";
 import OrdersTableSkeleton from "../../../components/orders/OrdersTableSkeleton";
@@ -99,6 +100,7 @@ const mockOrdersData = [
 ];
 
 const OrdersPage = () => {
+  const router = useRouter();
   const [ordersData, setOrdersData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -130,8 +132,7 @@ const OrdersPage = () => {
   }, [ordersData, selectedStatus]);
 
   const handleAddOrder = () => {
-    console.log("Add order clicked");
-    // Add order functionality will be implemented later
+    router.push("/orders/add-orders");
   };
 
   const handleStatusChange = (status) => {
@@ -154,7 +155,7 @@ const OrdersPage = () => {
             />
             <button
               onClick={handleAddOrder}
-              className="flex items-center space-x-2 px-6 py-2.5 bg-accent hover:bg-accent/90 text-white rounded-lg transition-colors font-medium"
+              className="flex items-center space-x-2 px-6 py-2.5 bg-accent cursor-pointer hover:bg-accent/90 text-white rounded-lg transition-colors font-medium"
             >
               <LuPlus size={18} />
               <span>Add Order</span>

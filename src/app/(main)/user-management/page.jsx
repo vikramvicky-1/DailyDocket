@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { LuPlus } from "react-icons/lu";
 import UsersTable from "../../../components/user-management/UsersTable";
 import UsersTableSkeleton from "../../../components/user-management/UsersTableSkeleton";
@@ -86,6 +87,7 @@ const mockUsersData = [
 ];
 
 const UserManagementPage = () => {
+  const router = useRouter();
   const [usersData, setUsersData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -117,8 +119,7 @@ const UserManagementPage = () => {
   }, [usersData, selectedRole]);
 
   const handleAddUser = () => {
-    console.log("Add user clicked");
-    // Add user functionality will be implemented later
+    router.push("/user-management/add-new-user");
   };
 
   const handleRoleChange = (role) => {
@@ -126,14 +127,12 @@ const UserManagementPage = () => {
   };
 
   return (
-    <div className="w-full max-w-full h-[calc(100vh-95px)]">
+    <div className="w-full max-w-full ">
       {/* Page Header */}
       <div className="mb-6 space-y-4">
         {/* Title and Add Button Row - Always together */}
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-text-primary">
-            User Management
-          </h1>
+          <h1 className="text-2xl font-bold text-text-primary">Users</h1>
 
           {/* Controls Row for Medium+ screens - Filter + Add Button */}
           <div className="hidden md:flex items-center space-x-4">
@@ -143,7 +142,7 @@ const UserManagementPage = () => {
             />
             <button
               onClick={handleAddUser}
-              className="flex items-center space-x-2 px-6 py-2.5 bg-accent hover:bg-accent/90 text-white rounded-lg transition-colors font-medium"
+              className="flex cursor-pointer items-center space-x-2 px-6 py-2.5 bg-accent hover:bg-accent/90 text-white rounded-lg transition-colors font-medium"
             >
               <LuPlus size={18} />
               <span>Add New User</span>

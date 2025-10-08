@@ -269,16 +269,16 @@ const ExpensesTable = ({ expensesData = [] }) => {
                 </div>
                 <div className="flex justify-end items-center mt-4 pt-4 border-t border-secondary/50 lg:mt-0 lg:pt-0 lg:border-none lg:justify-start">
                   <button
-                    className="p-1.5 hover:bg-tertiary rounded-full transition-colors"
+                    className="p-1.5 cursor-pointer  hover:text-blue-700 hover:bg-hover rounded transition-colors"
                     title="Edit"
                   >
-                    <TbEdit size={16} />
+                    <TbEdit size={17} />
                   </button>
                   <button
-                    className="p-1.5 hover:bg-tertiary rounded-full transition-colors"
+                    className="p-1.5 hover:text-red cursor-pointer hover:bg-hover rounded transition-colors"
                     title="Delete"
                   >
-                    <LuTrash2 size={16} />
+                    <LuTrash2 size={17} />
                   </button>
                 </div>
               </div>

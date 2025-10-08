@@ -164,7 +164,7 @@ const ExpensesPage = () => {
             />
             <button
               onClick={handleAddExpense}
-              className="flex items-center space-x-2 px-6 py-2.5 bg-accent hover:bg-accent/90 text-white rounded-lg transition-colors font-medium"
+              className="flex items-center cursor-pointer space-x-2 px-6 py-2.5 bg-accent hover:bg-accent/90 text-white rounded-lg transition-colors font-medium"
             >
               <LuPlus size={18} />
               <span>Add Expense</span>

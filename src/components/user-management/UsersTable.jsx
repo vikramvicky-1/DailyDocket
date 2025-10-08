@@ -1,13 +1,17 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { LuTrash2 } from "react-icons/lu";
 import { TbEdit } from "react-icons/tb";
 
 const UsersTable = ({ usersData }) => {
-  const handleEdit = (user) => {
-    console.log("Edit user:", user);
-    // Edit functionality will be implemented later
+  const router = useRouter();
+
+  const handleEdit = (user, index) => {
+    // In real app, you would use the actual user ID
+    const userId = user.id || index + 1; // Using user ID or index+1 as mock ID
+    router.push(`/user-management/edit/${userId}`);
   };
 
   const handleDelete = (user) => {
@@ -106,18 +110,17 @@ const UsersTable = ({ usersData }) => {
                 </div>
                 <div className="flex justify-end items-center mt-4 pt-4 border-t border-secondary/50 lg:mt-0 lg:pt-0 lg:border-none lg:justify-center">
                   <button
-                    onClick={() => handleEdit(user)}
-                    className="p-1.5 hover:bg-tertiary rounded-full transition-colors"
+                    onClick={() => handleEdit(user, index)}
+                    className="p-1.5 cursor-pointer  hover:text-blue-700 hover:bg-hover rounded transition-colors"
                     title="Edit"
                   >
-                    <TbEdit size={16} />
+                    <TbEdit size={17} />
                   </button>
                   <button
-                    onClick={() => handleDelete(user)}
-                    className="p-1.5 hover:bg-tertiary rounded-full transition-colors"
+                    className="p-1.5 hover:text-red cursor-pointer hover:bg-hover rounded transition-colors"
                     title="Delete"
                   >
-                    <LuTrash2 size={16} />
+                    <LuTrash2 size={17} />
                   </button>
                 </div>
               </div>

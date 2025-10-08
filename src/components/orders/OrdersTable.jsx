@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   LuPencil,
   LuTrash2,
@@ -16,6 +17,7 @@ import { FaFileExcel } from "react-icons/fa";
 import { FaFilePdf } from "react-icons/fa6";
 
 const OrdersTable = ({ ordersData = [] }) => {
+  const router = useRouter();
   const [sortField, setSortField] = useState("date");
   const [sortDirection, setSortDirection] = useState("desc");
   const [showExportDialog, setShowExportDialog] = useState(false);
@@ -66,6 +68,13 @@ const OrdersTable = ({ ordersData = [] }) => {
     // TODO: Implement PDF export logic
     console.log("Exporting orders to PDF...");
     setShowExportDialog(false);
+  };
+
+  // Handle edit functionality
+  const handleEdit = (row, index) => {
+    // In real app, you would use the actual order ID
+    const orderId = row.orderId || index + 1; // Using orderId or index+1 as mock ID
+    router.push(`/orders/edit/${orderId}`);
   };
 
   const getStatusBadge = (status) => {
@@ -265,16 +274,17 @@ const OrdersTable = ({ ordersData = [] }) => {
                 </div>
                 <div className="flex justify-end items-center mt-4 pt-4 border-t border-secondary/50 lg:mt-0 lg:pt-0 lg:border-none lg:justify-start">
                   <button
-                    className="p-1.5 hover:bg-tertiary rounded-full transition-colors"
+                    onClick={() => handleEdit(row, index)}
+                    className="p-1.5 cursor-pointer  hover:text-blue-700 hover:bg-hover rounded transition-colors"
                     title="Edit"
                   >
-                    <TbEdit size={16} />
+                    <TbEdit size={17} />
                   </button>
                   <button
-                    className="p-1.5 hover:bg-tertiary rounded-full transition-colors"
+                    className="p-1.5 hover:text-red cursor-pointer hover:bg-hover rounded transition-colors"
                     title="Delete"
                   >
-                    <LuTrash2 size={16} />
+                    <LuTrash2 size={17} />
                   </button>
                 </div>
               </div>

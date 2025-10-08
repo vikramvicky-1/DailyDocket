@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { LuDownload, LuTrash2, LuX } from "react-icons/lu";
 import { GoTriangleUp, GoTriangleDown } from "react-icons/go";
 import { TbEdit } from "react-icons/tb";
@@ -8,6 +9,7 @@ import { CgExport } from "react-icons/cg";
 import { FaFileExcel } from "react-icons/fa";
 import { FaFilePdf } from "react-icons/fa6";
 const SalesTable = ({ salesData = [] }) => {
+  const router = useRouter();
   const [sortField, setSortField] = useState("date");
   const [sortDirection, setSortDirection] = useState("desc");
   const [showExportDialog, setShowExportDialog] = useState(false);
@@ -67,6 +69,13 @@ const SalesTable = ({ salesData = [] }) => {
     // TODO: Implement PDF export logic
     console.log("Exporting to PDF...");
     setShowExportDialog(false);
+  };
+
+  // Handle edit functionality
+  const handleEdit = (row, index) => {
+    // In real app, you would use the actual sale ID
+    const saleId = index + 1; // Using index+1 as mock ID
+    router.push(`/sales/edit/${saleId}`);
   };
 
   const columns = [
@@ -237,16 +246,17 @@ const SalesTable = ({ salesData = [] }) => {
                 </div>
                 <div className="flex justify-end items-center mt-4 pt-4 border-t border-secondary/50 lg:mt-0 lg:pt-0 lg:border-none lg:justify-start">
                   <button
-                    className="p-1.5 hover:bg-tertiary rounded-full transition-colors"
+                    onClick={() => handleEdit(row, index)}
+                    className="p-1.5 cursor-pointer  hover:text-blue-700 hover:bg-hover rounded transition-colors"
                     title="Edit"
                   >
-                    <TbEdit size={16} />
+                    <TbEdit size={17} />
                   </button>
                   <button
-                    className="p-1.5 hover:bg-tertiary rounded-full transition-colors"
+                    className="p-1.5 hover:text-red cursor-pointer hover:bg-hover rounded transition-colors"
                     title="Delete"
                   >
-                    <LuTrash2 size={16} />
+                    <LuTrash2 size={17} />
                   </button>
                 </div>
               </div>

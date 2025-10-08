@@ -1,13 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { LuUpload, LuSave, LuArrowLeft } from "react-icons/lu";
+import React, { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { LuUpload, LuSave, LuArrowLeft, LuX } from "react-icons/lu";
 import { MdKeyboardArrowRight } from "react-icons/md";
-import CustomDatePicker from "../../../../components/ui/CustomDatePicker";
+import CustomDatePicker from "../../../../../components/ui/CustomDatePicker";
 
-const AddSalesPage = () => {
+const EditSalePage = () => {
   const router = useRouter();
+  const params = useParams();
+  const { id } = params;
 
   // Form state
   const [formData, setFormData] = useState({
@@ -23,6 +25,34 @@ const AddSalesPage = () => {
 
   const [file, setFile] = useState(null);
   const [dragActive, setDragActive] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Mock data - In real app, this would come from API
+  const mockSaleData = {
+    date: new Date("2025-09-25"),
+    openingCash: "890",
+    purchaseCash: "1890",
+    onlineCash: "5890",
+    physicalCash: "1890",
+    cashTransferred: "1890",
+    closingCash: "50",
+    totalSale: "11000",
+    attachment: null,
+  };
+
+  // Load existing sale data
+  useEffect(() => {
+    const loadSaleData = async () => {
+      setLoading(true);
+      // In real app, fetch data based on id
+      setFormData(mockSaleData);
+      setLoading(false);
+    };
+
+    if (id) {
+      loadSaleData();
+    }
+  }, [id]);
 
   // Handle form input changes
   const handleInputChange = (e) => {
@@ -106,13 +136,18 @@ const AddSalesPage = () => {
     }
   };
 
+  // Remove uploaded file
+  const handleRemoveFile = () => {
+    setFile(null);
+  };
+
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     // Here you would typically send the data to your API
     console.log("Form submitted:", { formData, file });
     // For now, just show a success message and redirect
-    alert("Sale added successfully!");
+    alert("Sale updated successfully!");
     router.push("/sales");
   };
 
@@ -135,6 +170,19 @@ const AddSalesPage = () => {
     );
   };
 
+  if (loading) {
+    return (
+      <div className="w-full flex flex-col">
+        <div className="flex-1 flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto mb-4"></div>
+            <p className="text-text-primary/70">Loading sale data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full flex flex-col">
       {/* Sticky Header with Breadcrumb Navigation and Action Buttons */}
@@ -155,7 +203,9 @@ const AddSalesPage = () => {
             <span className="text-text-primary flex-shrink-0">
               <MdKeyboardArrowRight size={20} />
             </span>
-            <h1 className="md:text-2xl text-xl font-bold truncate">Add Sale</h1>
+            <h1 className="md:text-2xl text-xl font-bold truncate">
+              Edit Sale
+            </h1>
           </div>
 
           {/* Action Buttons */}
@@ -169,7 +219,7 @@ const AddSalesPage = () => {
             </button>
             <button
               type="submit"
-              form="add-sale-form"
+              form="edit-sale-form"
               disabled={!isFormValid()}
               className={`flex items-center gap-1 md:gap-2 px-2 md:px-6 py-2.5 md:py-3 rounded-lg transition-colors font-medium text-sm md:text-base whitespace-nowrap ${
                 isFormValid()
@@ -178,7 +228,7 @@ const AddSalesPage = () => {
               }`}
             >
               <LuSave size={18} />
-              <span>Save Sale</span>
+              <span>Update Sale</span>
             </button>
           </div>
         </div>
@@ -190,14 +240,14 @@ const AddSalesPage = () => {
           {/* Static Header Section - will NOT scroll */}
           <div className="pb-4">
             <h1 className="md:text-2xl text-xl font-bold text-text-primary">
-              Add Sale
+              Edit Sale
             </h1>
           </div>
 
           {/* Scrollable Content Area - matches table scrolling behavior */}
           <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar max-h-[650px] md:max-h-[500px] lg:max-h-[510px]">
             <form
-              id="add-sale-form"
+              id="edit-sale-form"
               onSubmit={handleSubmit}
               className="space-y-5 lg:space-y-6 min-w-0"
             >
@@ -348,43 +398,55 @@ const AddSalesPage = () => {
                 >
                   <input
                     type="file"
-                    onChange={handleFileChange}
                     accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                    onChange={handleFileChange}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   />
-                  <div className="flex flex-col items-center justify-center h-full px-6 text-center">
-                    <LuUpload className="w-6 h-6 text-gray-400 mb-2" />
-                    {file ? (
-                      <div className="text-text-primary">
-                        <p className="font-medium">{file.name}</p>
-                        <p className="text-sm text-gray-400">
-                          {(file.size / (1024 * 1024)).toFixed(2)} MB
-                        </p>
-                      </div>
-                    ) : (
-                      <>
-                        <p className="text-text-primary font-medium">
-                          Drag and Drop Files Here /{" "}
-                          <span className="text-accent cursor-pointer underline">
-                            Choose File
-                          </span>
-                        </p>
-                        <p className="text-sm text-gray-400 mt-1">
-                          Supported File Type: PDF, Word, PNG, JPG &nbsp;&nbsp;
-                          Max. File Size: 10MB
-                        </p>
-                      </>
-                    )}
+                  <div className="flex flex-col items-center justify-center h-full text-center p-4">
+                    <LuUpload className="w-6 h-6 text-accent mb-2" />
+                    <p className="text-sm text-gray-300">
+                      <span className="text-accent cursor-pointer hover:underline">
+                        Choose File
+                      </span>{" "}
+                      / Drag and Drop Files Here
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Supported File Type: PDF, Word, PNG, JPG • Max. File Size:
+                      10MB
+                    </p>
                   </div>
+                  {file && (
+                    <div className="absolute bottom-2 left-2 right-2 bg-primary rounded px-2 py-1">
+                      <p className="text-xs text-text-primary truncate">
+                        {file.name}
+                      </p>
+                    </div>
+                  )}
                 </div>
+
+                {/* Show uploaded file with remove option */}
                 {file && (
-                  <button
-                    type="button"
-                    onClick={() => setFile(null)}
-                    className="text-red-500 text-sm hover:text-red-400 transition-colors"
-                  >
-                    Remove file
-                  </button>
+                  <div className="mt-4">
+                    <div className="flex items-center gap-2 p-3 bg-primary rounded-lg">
+                      <div className="flex items-center gap-2 flex-1">
+                        <div className="w-8 h-8 bg-red-500 rounded flex items-center justify-center flex-shrink-0">
+                          <span className="text-white text-xs font-medium">
+                            {file.name.split(".").pop().toUpperCase()}
+                          </span>
+                        </div>
+                        <span className="text-sm text-text-primary truncate">
+                          {file.name}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleRemoveFile}
+                        className="text-gray-400 hover:text-red-400 transition-colors flex-shrink-0"
+                      >
+                        <LuX size={16} />
+                      </button>
+                    </div>
+                  </div>
                 )}
               </div>
             </form>
@@ -395,4 +457,4 @@ const AddSalesPage = () => {
   );
 };
 
-export default AddSalesPage;
+export default EditSalePage;
