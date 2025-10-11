@@ -4,6 +4,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { LuTrash2 } from "react-icons/lu";
 import { TbEdit } from "react-icons/tb";
+import UserMobileCard from "./UserMobileCard";
 
 const UsersTable = ({ usersData }) => {
   const router = useRouter();
@@ -76,30 +77,36 @@ const UsersTable = ({ usersData }) => {
           ))}
         </div>
 
-        {/* Table Body */}
-        <div className="space-y-4 lg:space-y-0">
+        {/* Mobile Card Layout for small screens */}
+        <div className="lg:hidden space-y-4">
+          {usersData.length > 0 ? (
+            usersData.map((user, index) => (
+              <UserMobileCard
+                key={index}
+                user={user}
+                index={index}
+                onEdit={handleEdit}
+                onDelete={(user) => console.log("Delete user:", user.name)}
+              />
+            ))
+          ) : (
+            <div className="p-8 text-center text-text-primary/60 bg-secondary rounded-b-lg">
+              No users data available
+            </div>
+          )}
+        </div>
+
+        {/* Table Body for large screens */}
+        <div className="hidden lg:block space-y-0">
           {usersData.length > 0 ? (
             usersData.map((user, index) => (
               <div
                 key={index}
-                className="block p-4 rounded-lg bg-secondary border-b border-gray-600/60 lg:grid lg:grid-cols-4 lg:gap-4 lg:p-4 lg:border-b lg:border-gray-600/60 lg:rounded-none lg:bg-transparent text-sm text-text-primary"
+                className="grid grid-cols-4 gap-4 p-4 border-b border-gray-600/60 text-sm text-text-primary"
               >
-                <div className="flex justify-between lg:block">
-                  <span className="font-bold text-text-primary/60 lg:hidden">
-                    Name:
-                  </span>{" "}
-                  {user.name}
-                </div>
-                <div className="flex justify-between lg:block">
-                  <span className="font-bold text-text-primary/60 lg:hidden">
-                    Email:
-                  </span>{" "}
-                  {user.email}
-                </div>
-                <div className="flex justify-between lg:block">
-                  <span className="font-bold text-text-primary/60 lg:hidden">
-                    Role:
-                  </span>{" "}
+                <div>{user.name}</div>
+                <div>{user.email}</div>
+                <div>
                   <span
                     className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleBadgeClass(
                       user.role
@@ -108,10 +115,10 @@ const UsersTable = ({ usersData }) => {
                     {user.role}
                   </span>
                 </div>
-                <div className="flex justify-end items-center mt-4 pt-4 border-t border-secondary/50 lg:mt-0 lg:pt-0 lg:border-none lg:justify-center">
+                <div className="flex justify-center items-center">
                   <button
                     onClick={() => handleEdit(user, index)}
-                    className="p-1.5 cursor-pointer  hover:text-blue-700 hover:bg-hover rounded transition-colors"
+                    className="p-1.5 cursor-pointer hover:text-blue-700 hover:bg-hover rounded transition-colors"
                     title="Edit"
                   >
                     <TbEdit size={17} />

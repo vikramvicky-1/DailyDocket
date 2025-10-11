@@ -222,24 +222,24 @@ const AddOrdersPage = () => {
               <span className="text-2xl font-bold">
                 <LuArrowLeft />
               </span>
-              <h1 className="font-bold md:text-2xl text-xl whitespace-nowrap">
+              <h1 className="font-bold text-base sm:text-lg md:text-2xl whitespace-nowrap">
                 Orders
               </h1>
             </button>
             <span className="text-text-primary flex-shrink-0">
               <MdKeyboardArrowRight size={20} />
             </span>
-            <h1 className="md:text-2xl text-xl font-bold truncate">
+            <h1 className="text-base sm:text-lg md:text-2xl font-bold truncate">
               Add Order
             </h1>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-2 md:gap-4 flex-shrink-0 ml-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 md:gap-4 flex-shrink-0 ml-2">
             <button
               type="button"
               onClick={handleCancel}
-              className="px-2 md:px-6 bg-secondary py-2.5 md:py-3 border border-accent text-accent rounded-lg hover:bg-primary/70 cursor-pointer transition-colors text-sm md:text-base font-medium whitespace-nowrap"
+              className="px-1.5 sm:px-2 md:px-6 bg-secondary py-2 sm:py-2.5 md:py-3 border border-accent text-accent rounded-lg hover:bg-primary/70 cursor-pointer transition-colors text-xs sm:text-sm md:text-base font-medium whitespace-nowrap"
             >
               Cancel
             </button>
@@ -247,14 +247,15 @@ const AddOrdersPage = () => {
               type="submit"
               form="add-order-form"
               disabled={!isFormValid()}
-              className={`flex items-center gap-1 md:gap-2 px-2 md:px-6 py-2.5 md:py-3 rounded-lg transition-colors font-medium text-sm md:text-base whitespace-nowrap ${
+              className={`flex items-center gap-1 sm:gap-1.5 md:gap-2 px-1.5 sm:px-2 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-lg transition-colors font-medium text-xs sm:text-sm md:text-base whitespace-nowrap ${
                 isFormValid()
                   ? "cursor-pointer bg-accent hover:bg-accent/90 text-white"
                   : "cursor-not-allowed bg-accent text-white"
               }`}
             >
-              <LuSave size={18} />
-              <span>Save Order</span>
+              <LuSave size={16} className="sm:w-[18px] sm:h-[18px]" />
+              <span className="hidden xs:inline">Save Order</span>
+              <span className="xs:hidden">Save</span>
             </button>
           </div>
         </div>
@@ -262,10 +263,10 @@ const AddOrdersPage = () => {
 
       {/* Form Container - matches table container pattern exactly */}
       <div className="flex-1 min-h-0 ">
-        <div className="bg-secondary rounded-xl p-4 sm:p-6 lg:p-5 flex flex-col h-full">
+        <div className="bg-secondary rounded-xl p-3 sm:p-4 md:p-6 lg:p-5 flex flex-col h-full">
           {/* Static Header Section - will NOT scroll */}
           <div className="pb-4">
-            <h1 className="md:text-2xl text-xl font-bold text-text-primary">
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-text-primary">
               Add Order
             </h1>
           </div>

@@ -15,6 +15,7 @@ import { TbEdit } from "react-icons/tb";
 import { CgExport } from "react-icons/cg";
 import { FaFileExcel } from "react-icons/fa";
 import { FaFilePdf } from "react-icons/fa6";
+import OrderMobileCard from "./OrderMobileCard";
 
 const OrdersTable = ({ ordersData = [] }) => {
   const router = useRouter();
@@ -204,78 +205,54 @@ const OrdersTable = ({ ordersData = [] }) => {
           ))}
         </div>
 
-        {/* Table Body */}
-        <div className="space-y-4 lg:space-y-0">
+        {/* Mobile Card Layout for small screens */}
+        <div className="lg:hidden space-y-4">
+          {sortedData.length > 0 ? (
+            sortedData.map((row, index) => (
+              <OrderMobileCard
+                key={index}
+                order={row}
+                index={index}
+                onEdit={handleEdit}
+                onDelete={(order) =>
+                  console.log("Delete order:", order.orderId)
+                }
+              />
+            ))
+          ) : (
+            <div className="p-8 text-center text-text-primary/60 bg-secondary rounded-b-lg">
+              No orders data available
+            </div>
+          )}
+        </div>
+
+        {/* Table Body for large screens */}
+        <div className="hidden lg:block space-y-0">
           {sortedData.length > 0 ? (
             sortedData.map((row, index) => (
               <div
                 key={index}
-                className="block p-4 rounded-lg bg-secondary border-b border-gray-600/60 lg:grid lg:grid-cols-10 lg:gap-4 lg:p-4 lg:border-b lg:border-gray-600/60 lg:rounded-none lg:bg-transparent text-sm text-text-primary"
+                className="grid grid-cols-10 gap-4 p-4 border-b border-gray-600/60 bg-transparent text-sm text-text-primary"
               >
-                <div className="flex justify-between lg:block">
-                  <span className="font-bold text-text-primary/60 lg:hidden">
-                    Order ID:
-                  </span>{" "}
-                  {row.orderId}
-                </div>
-                <div className="flex justify-between lg:block">
-                  <span className="font-bold text-text-primary/60 lg:hidden">
-                    Date:
-                  </span>{" "}
-                  {formatDate(row.date)}
-                </div>
-                <div className="flex justify-between lg:block">
-                  <span className="font-bold text-text-primary/60 lg:hidden">
-                    Customer Name:
-                  </span>{" "}
-                  {row.customerName}
-                </div>
-                <div className="flex justify-between lg:block">
-                  <span className="font-bold text-text-primary/60 lg:hidden">
-                    Delivery Date:
-                  </span>{" "}
-                  {formatDate(row.deliveryDate)}
-                </div>
-                <div className="flex justify-between lg:block">
-                  <span className="font-bold text-text-primary/60 lg:hidden">
-                    Payment Mode:
-                  </span>{" "}
-                  {row.paymentMode}
-                </div>
-                <div
-                  className="flex justify-between lg:block truncate"
-                  title={row.billAttachment || "No file"}
-                >
-                  <span className="font-bold text-text-primary/60 lg:hidden">
-                    Bill:
-                  </span>{" "}
+                <div>{row.orderId}</div>
+                <div>{formatDate(row.date)}</div>
+                <div>{row.customerName}</div>
+                <div>{formatDate(row.deliveryDate)}</div>
+                <div>{row.paymentMode}</div>
+                <div title={row.billAttachment || "No file"}>
                   {getAttachmentDisplay(row.billAttachment, "bill")}
                 </div>
-                <div
-                  className="flex justify-between lg:block truncate"
-                  title={row.paymentAttachment || "No file"}
-                >
-                  <span className="font-bold text-text-primary/60 lg:hidden">
-                    Payment:
-                  </span>{" "}
+                <div title={row.paymentAttachment || "No file"}>
                   {getAttachmentDisplay(row.paymentAttachment, "payment")}
                 </div>
-                <div className="flex justify-between lg:block">
-                  <span className="font-bold text-text-primary/60 lg:hidden">
-                    Status:
-                  </span>{" "}
-                  {getStatusBadge(row.status)}
-                </div>
-                <div className="flex justify-between lg:block font-medium text-green-400">
-                  <span className="font-bold text-text-primary/60 lg:hidden">
-                    Total Amount:
-                  </span>{" "}
+                <div>{getStatusBadge(row.status)}</div>
+                <div className="font-medium text-green-400">
                   +{formatCurrency(row.totalAmount)}
                 </div>
-                <div className="flex justify-end items-center mt-4 pt-4 border-t border-secondary/50 lg:mt-0 lg:pt-0 lg:border-none lg:justify-start">
+                <div className="flex items-center justify-start">
                   <button
                     onClick={() => handleEdit(row, index)}
-                    className="p-1.5 cursor-pointer  hover:text-blue-700 hover:bg-hover rounded transition-colors"
+                    className="p-1.5 cursor-pointer hover:text-blue-700 hover:bg-hover rounded transition-colors"
                     title="Edit"
                   >
                     <TbEdit size={17} />

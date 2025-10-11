@@ -148,22 +148,24 @@ const AddSalesPage = () => {
               <span className="text-2xl font-bold">
                 <LuArrowLeft />
               </span>
-              <h1 className="font-bold md:text-2xl text-xl whitespace-nowrap">
+              <h1 className="font-bold text-base sm:text-lg md:text-2xl whitespace-nowrap">
                 Sales
               </h1>
             </button>
             <span className="text-text-primary flex-shrink-0">
               <MdKeyboardArrowRight size={20} />
             </span>
-            <h1 className="md:text-2xl text-xl font-bold truncate">Add Sale</h1>
+            <h1 className="text-base sm:text-lg md:text-2xl font-bold truncate">
+              Add Sale
+            </h1>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-2 md:gap-4 flex-shrink-0 ml-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 md:gap-4 flex-shrink-0 ml-2">
             <button
               type="button"
               onClick={handleCancel}
-              className="px-2 md:px-6 bg-secondary py-2.5 md:py-3 border border-accent text-accent rounded-lg hover:bg-primary/70 cursor-pointer transition-colors text-sm md:text-base font-medium whitespace-nowrap"
+              className="px-1.5 sm:px-2 md:px-6 bg-secondary py-2 sm:py-2.5 md:py-3 border border-accent text-accent rounded-lg hover:bg-primary/70 cursor-pointer transition-colors text-xs sm:text-sm md:text-base font-medium whitespace-nowrap"
             >
               Cancel
             </button>
@@ -171,14 +173,15 @@ const AddSalesPage = () => {
               type="submit"
               form="add-sale-form"
               disabled={!isFormValid()}
-              className={`flex items-center gap-1 md:gap-2 px-2 md:px-6 py-2.5 md:py-3 rounded-lg transition-colors font-medium text-sm md:text-base whitespace-nowrap ${
+              className={`flex items-center gap-1 sm:gap-1.5 md:gap-2 px-1.5 sm:px-2 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-lg transition-colors font-medium text-xs sm:text-sm md:text-base whitespace-nowrap ${
                 isFormValid()
                   ? "cursor-pointer bg-accent hover:bg-accent/90 text-white"
                   : "cursor-not-allowed bg-accent text-white"
               }`}
             >
-              <LuSave size={18} />
-              <span>Save Sale</span>
+              <LuSave size={16} className="sm:w-[18px] sm:h-[18px]" />
+              <span className="hidden xs:inline">Save Sale</span>
+              <span className="xs:hidden">Save</span>
             </button>
           </div>
         </div>
@@ -186,10 +189,10 @@ const AddSalesPage = () => {
 
       {/* Form Container - matches table container pattern exactly */}
       <div className="flex-1 min-h-0 ">
-        <div className="bg-secondary rounded-xl p-4 sm:p-6 lg:p-5 flex flex-col h-full">
+        <div className="bg-secondary rounded-xl p-3 sm:p-4 md:p-6 lg:p-5 flex flex-col h-full">
           {/* Static Header Section - will NOT scroll */}
           <div className="pb-4">
-            <h1 className="md:text-2xl text-xl font-bold text-text-primary">
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-text-primary">
               Add Sale
             </h1>
           </div>
@@ -229,7 +232,7 @@ const AddSalesPage = () => {
                     onChange={handleInputChange}
                     placeholder="Enter Amount"
                     required
-                    className="w-full h-11 px-5 py-2.5 bg-form-bg border border-[#545454] rounded-lg text-text-primary placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+                    className="w-full h-10 sm:h-11 px-3 sm:px-5 py-2 sm:py-2.5 bg-form-bg border border-[#545454] rounded-lg text-text-primary placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                   />
                 </div>
 
@@ -245,7 +248,7 @@ const AddSalesPage = () => {
                     onChange={handleInputChange}
                     placeholder="Enter Amount"
                     required
-                    className="w-full h-11 px-5 py-2.5 bg-form-bg border border-[#545454] rounded-lg text-text-primary placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+                    className="w-full h-10 sm:h-11 px-3 sm:px-5 py-2 sm:py-2.5 bg-form-bg border border-[#545454] rounded-lg text-text-primary placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                   />
                 </div>
 
@@ -261,7 +264,7 @@ const AddSalesPage = () => {
                     onChange={handleInputChange}
                     placeholder="Enter Amount"
                     required
-                    className="w-full h-11 px-5 py-2.5 bg-form-bg border border-[#545454] rounded-lg text-text-primary placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+                    className="w-full h-10 sm:h-11 px-3 sm:px-5 py-2 sm:py-2.5 bg-form-bg border border-[#545454] rounded-lg text-text-primary placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                   />
                 </div>
 
@@ -277,7 +280,7 @@ const AddSalesPage = () => {
                     onChange={handleInputChange}
                     placeholder="Enter Amount"
                     required
-                    className="w-full h-11 px-5 py-2.5 bg-form-bg border border-[#545454] rounded-lg text-text-primary placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+                    className="w-full h-10 sm:h-11 px-3 sm:px-5 py-2 sm:py-2.5 bg-form-bg border border-[#545454] rounded-lg text-text-primary placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                   />
                 </div>
 
@@ -293,7 +296,7 @@ const AddSalesPage = () => {
                     onChange={handleInputChange}
                     placeholder="Enter Amount"
                     required
-                    className="w-full h-11 px-5 py-2.5 bg-form-bg border border-[#545454] rounded-lg text-text-primary placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+                    className="w-full h-10 sm:h-11 px-3 sm:px-5 py-2 sm:py-2.5 bg-form-bg border border-[#545454] rounded-lg text-text-primary placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                   />
                 </div>
 
@@ -309,7 +312,7 @@ const AddSalesPage = () => {
                     onChange={handleInputChange}
                     placeholder="Enter Amount"
                     required
-                    className="w-full h-11 px-5 py-2.5 bg-form-bg border border-[#545454] rounded-lg text-text-primary placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+                    className="w-full h-10 sm:h-11 px-3 sm:px-5 py-2 sm:py-2.5 bg-form-bg border border-[#545454] rounded-lg text-text-primary placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                   />
                 </div>
 
@@ -325,7 +328,7 @@ const AddSalesPage = () => {
                     onChange={handleInputChange}
                     placeholder="Enter Amount"
                     required
-                    className="w-full h-11 px-5 py-2.5 bg-form-bg border border-[#545454] rounded-lg text-text-primary placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+                    className="w-full h-10 sm:h-11 px-3 sm:px-5 py-2 sm:py-2.5 bg-form-bg border border-[#545454] rounded-lg text-text-primary placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                   />
                 </div>
               </div>

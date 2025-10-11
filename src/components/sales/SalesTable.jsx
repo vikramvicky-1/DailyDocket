@@ -8,6 +8,7 @@ import { TbEdit } from "react-icons/tb";
 import { CgExport } from "react-icons/cg";
 import { FaFileExcel } from "react-icons/fa";
 import { FaFilePdf } from "react-icons/fa6";
+import SalesMobileCard from "./SalesMobileCard";
 const SalesTable = ({ salesData = [] }) => {
   const router = useRouter();
   const [sortField, setSortField] = useState("date");
@@ -173,81 +174,51 @@ const SalesTable = ({ salesData = [] }) => {
           ))}
         </div>
 
-        {/* Table Body */}
-        <div className="space-y-4 lg:space-y-0">
+        {/* Mobile Card Layout for small screens */}
+        <div className="lg:hidden space-y-4">
+          {sortedData.length > 0 ? (
+            sortedData.map((row, index) => (
+              <SalesMobileCard
+                key={index}
+                sale={row}
+                index={index}
+                onEdit={handleEdit}
+                onDelete={(sale) => console.log("Delete sale:", sale)}
+              />
+            ))
+          ) : (
+            <div className="p-8 text-center text-text-primary/60 bg-secondary rounded-b-lg">
+              No sales data available
+            </div>
+          )}
+        </div>
+
+        {/* Table Body for large screens */}
+        <div className="hidden lg:block space-y-0">
           {sortedData.length > 0 ? (
             sortedData.map((row, index) => (
               <div
                 key={index}
-                className="block p-4 rounded-lg bg-secondary border-b border-gray-600/60 lg:grid lg:grid-cols-11 lg:gap-4 lg:p-4 lg:border-b lg:border-gray-600/60 lg:rounded-none lg:bg-transparent text-sm text-text-primary"
+                className="grid grid-cols-11 gap-4 p-4 border-b border-gray-600/60 bg-transparent text-sm text-text-primary"
               >
-                <div className="flex justify-between lg:block">
-                  <span className="font-bold text-text-primary/60 lg:hidden">
-                    Date:
-                  </span>{" "}
-                  {formatDate(row.date)}
-                </div>
-                <div className="flex justify-between lg:block">
-                  <span className="font-bold text-text-primary/60 lg:hidden">
-                    Time:
-                  </span>{" "}
-                  {formatTime(row.date)}
-                </div>
-                <div className="flex justify-between lg:block">
-                  <span className="font-bold text-text-primary/60 lg:hidden">
-                    Opening:
-                  </span>{" "}
-                  {formatCurrency(row.opening)}
-                </div>
-                <div className="flex justify-between lg:block">
-                  <span className="font-bold text-text-primary/60 lg:hidden">
-                    Purchase:
-                  </span>{" "}
-                  {formatCurrency(row.purchase)}
-                </div>
-                <div className="flex justify-between lg:block">
-                  <span className="font-bold text-text-primary/60 lg:hidden">
-                    Online:
-                  </span>{" "}
-                  {formatCurrency(row.onlinePayment)}
-                </div>
-                <div className="flex justify-between lg:block">
-                  <span className="font-bold text-text-primary/60 lg:hidden">
-                    Physical:
-                  </span>{" "}
-                  {formatCurrency(row.cashPayment)}
-                </div>
-                <div className="flex justify-between lg:block">
-                  <span className="font-bold text-text-primary/60 lg:hidden">
-                    Transferred:
-                  </span>{" "}
-                  {formatCurrency(row.transferred)}
-                </div>
-                <div className="flex justify-between lg:block">
-                  <span className="font-bold text-text-primary/60 lg:hidden">
-                    Closing:
-                  </span>{" "}
-                  {formatCurrency(row.closing)}
-                </div>
-                <div
-                  className="flex justify-between lg:block truncate"
-                  title={row.attachment || "No file"}
-                >
-                  <span className="font-bold text-text-primary/60 lg:hidden">
-                    Attachment:
-                  </span>{" "}
+                <div>{formatDate(row.date)}</div>
+                <div>{formatTime(row.date)}</div>
+                <div>{formatCurrency(row.opening)}</div>
+                <div>{formatCurrency(row.purchase)}</div>
+                <div>{formatCurrency(row.onlinePayment)}</div>
+                <div>{formatCurrency(row.cashPayment)}</div>
+                <div>{formatCurrency(row.transferred)}</div>
+                <div>{formatCurrency(row.closing)}</div>
+                <div title={row.attachment || "No file"}>
                   {row.attachment || "No file"}
                 </div>
-                <div className="flex justify-between lg:block font-medium text-green-400">
-                  <span className="font-bold text-text-primary/60 lg:hidden">
-                    Total Sales:
-                  </span>{" "}
+                <div className="font-medium text-green-400">
                   +{formatCurrency(row.totalSales)}
                 </div>
-                <div className="flex justify-end items-center mt-4 pt-4 border-t border-secondary/50 lg:mt-0 lg:pt-0 lg:border-none lg:justify-start">
+                <div className="flex items-center justify-start">
                   <button
                     onClick={() => handleEdit(row, index)}
-                    className="p-1.5 cursor-pointer  hover:text-blue-700 hover:bg-hover rounded transition-colors"
+                    className="p-1.5 cursor-pointer hover:text-blue-700 hover:bg-hover rounded transition-colors"
                     title="Edit"
                   >
                     <TbEdit size={17} />

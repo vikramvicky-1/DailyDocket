@@ -41,50 +41,78 @@ const ExpensesTableSkeleton = () => {
         {/* Table Body Skeleton */}
         <div className="space-y-4 lg:space-y-0">
           {[...Array(8)].map((_, index) => (
-            <div
-              key={index}
-              className="block p-4 rounded-lg bg-secondary border-b border-gray-600/60 lg:grid lg:grid-cols-10 lg:gap-4 lg:p-4 lg:border-b lg:border-gray-600/60 lg:rounded-none lg:bg-transparent text-sm text-text-primary"
-            >
-              {/* Mobile/Tablet View */}
-              <div className="flex justify-between lg:block mb-2 lg:mb-0">
-                <div className="h-3 bg-gray-500/30 rounded w-12 lg:hidden"></div>
-                <div className="h-4 bg-gray-600/30 rounded w-16"></div>
+            <div key={index}>
+              {/* Mobile Card Skeleton (visible on mobile/tablet) */}
+              <div className="block lg:hidden bg-gradient-to-br from-primary to-secondary rounded-xl p-4 shadow-lg border border-primary/30">
+                {/* Header with Date and Actions */}
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex flex-col space-y-1">
+                    <div className="h-4 bg-gray-400/30 rounded w-20"></div>
+                    <div className="h-5 bg-red-300/30 rounded w-40"></div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="h-8 w-8 bg-gray-400/30 rounded-full"></div>
+                    <div className="h-8 w-8 bg-gray-400/30 rounded-full"></div>
+                  </div>
+                </div>
+
+                {/* Data Grid Skeleton - 2x3 layout */}
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="space-y-1">
+                    <div className="h-3 bg-gray-400/30 rounded w-16"></div>
+                    <div className="h-4 bg-gray-300/30 rounded w-20"></div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="h-3 bg-gray-400/30 rounded w-18"></div>
+                    <div className="h-4 bg-gray-300/30 rounded w-24"></div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="h-3 bg-gray-400/30 rounded w-22"></div>
+                    <div className="h-4 bg-gray-300/30 rounded w-16"></div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="h-3 bg-gray-400/30 rounded w-12"></div>
+                    <div className="h-6 bg-green-400/30 rounded-full w-16"></div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="h-3 bg-gray-400/30 rounded w-14"></div>
+                    <div className="h-4 bg-gray-300/30 rounded w-18"></div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="h-3 bg-gray-400/30 rounded w-8"></div>
+                    <div className="h-4 bg-green-400/30 rounded w-16"></div>
+                  </div>
+                </div>
+
+                {/* Optional Attachment Section Skeleton */}
+                {index % 3 === 0 && (
+                  <div className="border-t border-primary/30 pt-3">
+                    <div className="flex items-center justify-between bg-secondary/50 rounded-lg p-3">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-red-400/30 rounded"></div>
+                        <div className="h-4 bg-gray-300/30 rounded w-16"></div>
+                      </div>
+                      <div className="h-6 w-6 bg-gray-400/30 rounded-full"></div>
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="flex justify-between lg:block mb-2 lg:mb-0">
-                <div className="h-3 bg-gray-500/30 rounded w-12 lg:hidden"></div>
+
+              {/* Desktop Table Row Skeleton (visible on large screens) */}
+              <div className="hidden lg:grid lg:grid-cols-10 lg:gap-4 lg:p-4 lg:border-b lg:border-gray-600/60 lg:rounded-none lg:bg-transparent text-sm text-text-primary">
+                <div className="h-4 bg-gray-600/30 rounded w-16"></div>
                 <div className="h-4 bg-gray-600/30 rounded w-14"></div>
-              </div>
-              <div className="flex justify-between lg:block mb-2 lg:mb-0">
-                <div className="h-3 bg-gray-500/30 rounded w-18 lg:hidden"></div>
                 <div className="h-4 bg-gray-600/30 rounded w-20"></div>
-              </div>
-              <div className="flex justify-between lg:block mb-2 lg:mb-0">
-                <div className="h-3 bg-gray-500/30 rounded w-20 lg:hidden"></div>
                 <div className="h-4 bg-gray-600/30 rounded w-18"></div>
-              </div>
-              <div className="flex justify-between lg:block mb-2 lg:mb-0">
-                <div className="h-3 bg-gray-500/30 rounded w-22 lg:hidden"></div>
                 <div className="h-4 bg-gray-600/30 rounded w-20"></div>
-              </div>
-              <div className="flex justify-between lg:block mb-2 lg:mb-0">
-                <div className="h-3 bg-gray-500/30 rounded w-14 lg:hidden"></div>
                 <div className="h-4 bg-gray-600/30 rounded w-16"></div>
-              </div>
-              <div className="flex justify-between lg:block mb-2 lg:mb-0">
-                <div className="h-3 bg-gray-500/30 rounded w-22 lg:hidden"></div>
                 <div className="h-4 bg-gray-600/30 rounded w-18"></div>
-              </div>
-              <div className="flex justify-between lg:block mb-2 lg:mb-0">
-                <div className="h-3 bg-gray-500/30 rounded w-24 lg:hidden"></div>
                 <div className="h-4 bg-gray-600/30 rounded w-16"></div>
-              </div>
-              <div className="flex justify-between lg:block mb-4 lg:mb-0">
-                <div className="h-3 bg-gray-500/30 rounded w-16 lg:hidden"></div>
                 <div className="h-4 bg-gray-600/30 rounded w-20"></div>
-              </div>
-              <div className="flex justify-end items-center mt-4 pt-4 border-t border-secondary/50 lg:mt-0 lg:pt-0 lg:border-none lg:justify-start">
-                <div className="h-6 w-6 bg-gray-600/30 rounded-full mr-2"></div>
-                <div className="h-6 w-6 bg-gray-600/30 rounded-full"></div>
+                <div className="flex justify-start items-center">
+                  <div className="h-6 w-6 bg-gray-600/30 rounded-full mr-2"></div>
+                  <div className="h-6 w-6 bg-gray-600/30 rounded-full"></div>
+                </div>
               </div>
             </div>
           ))}
