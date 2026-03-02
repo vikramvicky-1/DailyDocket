@@ -2,6 +2,7 @@
 import React from "react";
 import Navbar from "../shared/navbar";
 import Sidebar from "../shared/sidebar";
+import ChatWidget from "../chatbot/ChatWidget";
 import { useSidebar } from "../../contexts/SidebarContext";
 import "../../styles/layout.css";
 
@@ -10,9 +11,8 @@ const MainLayout = ({ children }) => {
 
   return (
     <div
-      className={`min-h-screen bg-primary ${
-        isClient ? "hydration-safe" : "hydration-loading"
-      }`}
+      className={`min-h-screen bg-primary ${isClient ? "hydration-safe" : "hydration-loading"
+        }`}
     >
       <Navbar onMenuClick={toggleSidebar} isMobile={isMobile} />
       <div className="flex">
@@ -22,9 +22,8 @@ const MainLayout = ({ children }) => {
           isMobile={isMobile}
         />
         <main
-          className={`flex-1 layout-transition main-content ${
-            isMobile ? "ml-0" : sidebarExpanded ? "ml-[280px]" : "ml-16"
-          }`}
+          className={`flex-1 layout-transition main-content ${isMobile ? "ml-0" : sidebarExpanded ? "ml-[280px]" : "ml-16"
+            }`}
           style={{
             // Prevent layout shift during hydration
             minHeight: "calc(100vh - 62px)",
@@ -33,13 +32,12 @@ const MainLayout = ({ children }) => {
           <div
             className={`
             p-4 
-            ${
-              isMobile
+            ${isMobile
                 ? "md:p-6"
                 : sidebarExpanded
-                ? "md:p-6 lg:p-8"
-                : "md:p-6 lg:p-8 xl:p-10"
-            } 
+                  ? "md:p-6 lg:p-8"
+                  : "md:p-6 lg:p-8 xl:p-10"
+              } 
             transition-all duration-300 ease-in-out
           `}
           >
@@ -55,6 +53,9 @@ const MainLayout = ({ children }) => {
           onClick={toggleSidebar}
         />
       )}
+
+      {/* AI Chatbot Widget */}
+      <ChatWidget />
     </div>
   );
 };
