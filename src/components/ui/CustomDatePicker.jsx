@@ -14,9 +14,8 @@ const CustomInput = forwardRef(({ value, onClick, placeholder }, ref) => (
   >
     <LuCalendar className="w-5 h-5 text-gray-400 flex-shrink-0 mr-2" />
     <span
-      className={`truncate flex-1 ${
-        value ? "text-text-primary" : "text-gray-400"
-      }`}
+      className={`truncate flex-1 ${value ? "text-text-primary" : "text-gray-400"
+        }`}
     >
       {value || placeholder}
     </span>
