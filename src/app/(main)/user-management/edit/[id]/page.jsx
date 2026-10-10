@@ -337,6 +337,17 @@ const EditUserPage = () => {
                 </div>
               </div>
 
+              {/* RBAC Permissions Section */}
+              <div className="mt-6 min-w-0">
+                <PermissionsSelector
+                  permissions={permissions}
+                  onChange={setPermissions}
+                  role={formData.role}
+                  isDefaultAdmin={isDefaultAdmin}
+                  disabled={isDefaultAdmin}
+                />
+              </div>
+
               {/* Picture Upload with live upload loading status */}
               <div className="mt-6 min-w-0">
                 <AttachmentUploader
@@ -347,17 +358,6 @@ const EditUserPage = () => {
                   accept=".png,.jpg,.jpeg,.webp"
                   helpText="Supported: PNG, JPG, JPEG • Max 12MB"
                   placeholderText="Choose Photo / Drag and Drop Photo Here"
-                />
-              </div>
-
-              {/* RBAC Permissions Section */}
-              <div className="mt-6 min-w-0">
-                <PermissionsSelector
-                  permissions={permissions}
-                  onChange={setPermissions}
-                  role={formData.role}
-                  isDefaultAdmin={isDefaultAdmin}
-                  disabled={isDefaultAdmin}
                 />
               </div>
             </form>

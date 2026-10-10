@@ -254,6 +254,15 @@ const AddNewUserPage = () => {
                 </div>
               </div>
 
+              {/* RBAC Permissions Section */}
+              <div className="mt-6 min-w-0">
+                <PermissionsSelector
+                  permissions={permissions}
+                  onChange={setPermissions}
+                  role={formData.role}
+                />
+              </div>
+
               {/* Profile Picture Upload with live upload loading status */}
               <div className="mt-6 min-w-0">
                 <AttachmentUploader
@@ -264,15 +273,6 @@ const AddNewUserPage = () => {
                   accept=".png,.jpg,.jpeg,.webp"
                   helpText="Supported: PNG, JPG, JPEG • Max 12MB"
                   placeholderText="Choose Photo / Drag and Drop Photo Here"
-                />
-              </div>
-
-              {/* RBAC Permissions Section */}
-              <div className="mt-6 min-w-0">
-                <PermissionsSelector
-                  permissions={permissions}
-                  onChange={setPermissions}
-                  role={formData.role}
                 />
               </div>
             </form>
