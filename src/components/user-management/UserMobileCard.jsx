@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import { LuPencil, LuTrash2, LuX } from "react-icons/lu";
 import { TbEdit } from "react-icons/tb";
 
-const UserMobileCard = ({ user, index, onEdit, onDelete }) => {
+const UserMobileCard = ({ user, index, onEdit, onDelete, canManage = true }) => {
+  const isDefaultAdmin = Boolean(
+    user.isDefaultAdmin || user.email?.toLowerCase() === "admin@dailydocket.com"
+  );
   const getRoleBadge = (role) => {
     const roleConfig = {
       Administrator: { bg: "bg-red-600", text: "text-white" },
@@ -32,7 +35,7 @@ const UserMobileCard = ({ user, index, onEdit, onDelete }) => {
   };
 
   const handleDelete = () => {
-    if (onDelete) onDelete(user, index);
+    if (onDelete && !isDefaultAdmin) onDelete(user, index);
   };
 
   return (
@@ -40,27 +43,38 @@ const UserMobileCard = ({ user, index, onEdit, onDelete }) => {
       {/* Header with User Name and Actions */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex flex-col">
-          <span className="text-white text-lg font-bold">{user.name}</span>
+          <div className="flex items-center gap-2">
+            <span className="text-white text-lg font-bold">{user.name || user.fullName}</span>
+            {isDefaultAdmin && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">
+                Primary Admin
+              </span>
+            )}
+          </div>
           <span className="text-gray-300 text-sm font-medium">
             {user.email}
           </span>
         </div>
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={handleEdit}
-            className="p-2 hover:bg-white/10 rounded-full transition-colors"
-            title="Edit User"
-          >
-            <TbEdit size={18} className="text-white" />
-          </button>
-          <button
-            onClick={handleDelete}
-            className="p-2 hover:bg-white/10 rounded-full transition-colors"
-            title="Delete User"
-          >
-            <LuTrash2 size={18} className="text-white" />
-          </button>
-        </div>
+        {canManage && (
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={handleEdit}
+              className="p-2 hover:bg-white/10 rounded-full transition-colors cursor-pointer"
+              title="Edit User"
+            >
+              <TbEdit size={18} className="text-white" />
+            </button>
+            {!isDefaultAdmin && (
+              <button
+                onClick={handleDelete}
+                className="p-2 hover:bg-white/10 rounded-full transition-colors cursor-pointer"
+                title="Delete User"
+              >
+                <LuTrash2 size={18} className="text-white" />
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Data Grid - Single row for role */}

@@ -1,10 +1,17 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { LuPencil, LuTrash2 } from "react-icons/lu";
+import { LuPencil, LuTrash2, LuEye } from "react-icons/lu";
 import { TbEdit } from "react-icons/tb";
 
-const ExpensesMobileCard = ({ expense, index, onEdit, onDelete }) => {
+const ExpensesMobileCard = ({
+  expense,
+  index,
+  onEdit,
+  onDelete,
+  onViewAttachment,
+  canManage = true,
+}) => {
   const formatCurrency = (amount) => `₹${(amount || 0).toLocaleString()}`;
   const formatDate = (dateString) =>
     new Date(dateString).toLocaleDateString("en-GB", {
@@ -53,22 +60,24 @@ const ExpensesMobileCard = ({ expense, index, onEdit, onDelete }) => {
             Total Expense: {formatCurrency(expense.totalAmount)}
           </span>
         </div>
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={handleEdit}
-            className="p-2 hover:bg-white/10 rounded-full transition-colors"
-            title="Edit Expense"
-          >
-            <TbEdit size={18} className="text-white" />
-          </button>
-          <button
-            onClick={handleDelete}
-            className="p-2 hover:bg-white/10 rounded-full transition-colors"
-            title="Delete Expense"
-          >
-            <LuTrash2 size={18} className="text-white" />
-          </button>
-        </div>
+        {canManage && (
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={handleEdit}
+              className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              title="Edit Expense"
+            >
+              <TbEdit size={18} className="text-white" />
+            </button>
+            <button
+              onClick={handleDelete}
+              className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              title="Delete Expense"
+            >
+              <LuTrash2 size={18} className="text-white" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Data Grid - 2x3 layout */}
@@ -127,13 +136,34 @@ const ExpensesMobileCard = ({ expense, index, onEdit, onDelete }) => {
           <span className="text-gray-300 text-xs">Bill</span>
           <div className="text-white text-sm font-medium">
             {expense.billAttachment ? (
-              <span className="text-green-400">Available</span>
+              <span className="text-green-400">Attached</span>
             ) : (
               <span className="text-gray-400">No file</span>
             )}
           </div>
         </div>
       </div>
+
+      {/* Bill Attachment Action */}
+      {expense.billAttachment && (
+        <div className="pt-3 border-t border-primary/30 flex items-center justify-between">
+          <span className="text-gray-300 text-xs">Receipt / Invoice</span>
+          <button
+            type="button"
+            onClick={() =>
+              onViewAttachment &&
+              onViewAttachment(
+                expense.billAttachment,
+                `Expense Receipt - ${expense.category || ""}`
+              )
+            }
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-accent/20 text-accent hover:bg-accent/30 text-xs font-medium cursor-pointer transition-colors"
+          >
+            <LuEye size={14} />
+            <span>View Attachment</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

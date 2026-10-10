@@ -1,10 +1,17 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { LuPencil, LuTrash2 } from "react-icons/lu";
+import { LuPencil, LuTrash2, LuEye } from "react-icons/lu";
 import { TbEdit } from "react-icons/tb";
 
-const SalesMobileCard = ({ sale, index, onEdit, onDelete }) => {
+const SalesMobileCard = ({
+  sale,
+  index,
+  onEdit,
+  onDelete,
+  onViewAttachment,
+  canManage = true,
+}) => {
   const formatCurrency = (amount) => `₹${(amount || 0).toLocaleString()}`;
   const formatDate = (dateString) =>
     new Date(dateString).toLocaleDateString("en-GB", {
@@ -33,22 +40,28 @@ const SalesMobileCard = ({ sale, index, onEdit, onDelete }) => {
             Total Sales: {formatCurrency(sale.totalSales)}
           </span>
         </div>
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={handleEdit}
-            className="p-2 hover:bg-white/10 rounded-full transition-colors"
-            title="Edit Sale"
-          >
-            <TbEdit size={18} className="text-white" />
-          </button>
-          <button
-            onClick={handleDelete}
-            className="p-2 hover:bg-white/10 rounded-full transition-colors"
-            title="Delete Sale"
-          >
-            <LuTrash2 size={18} className="text-white" />
-          </button>
-        </div>
+        {canManage && (onEdit || onDelete) && (
+          <div className="flex items-center space-x-2">
+            {onEdit && (
+              <button
+                onClick={handleEdit}
+                className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                title="Edit Sale"
+              >
+                <TbEdit size={18} className="text-white" />
+              </button>
+            )}
+            {onDelete && (
+              <button
+                onClick={handleDelete}
+                className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                title="Delete Sale"
+              >
+                <LuTrash2 size={18} className="text-white" />
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Data Grid - 2x3 layout */}
@@ -101,6 +114,21 @@ const SalesMobileCard = ({ sale, index, onEdit, onDelete }) => {
           </div>
         </div>
       </div>
+
+      {/* Attachment Button */}
+      {sale.attachment && (
+        <div className="pt-3 border-t border-primary/30 flex items-center justify-between">
+          <span className="text-gray-300 text-xs">Receipt / Bill</span>
+          <button
+            type="button"
+            onClick={() => onViewAttachment && onViewAttachment(sale.attachment)}
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-accent/20 text-accent hover:bg-accent/30 text-xs font-medium cursor-pointer transition-colors"
+          >
+            <LuEye size={14} />
+            <span>View Attachment</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

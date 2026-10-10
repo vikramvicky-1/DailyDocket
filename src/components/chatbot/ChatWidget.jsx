@@ -112,14 +112,14 @@ const ChatWidget = () => {
 
     // Parse and execute action blocks from assistant response
     const parseAndExecuteActions = useCallback(
-        (text) => {
+        async (text) => {
             const actionRegex = /```action\s*\n?([\s\S]*?)\n?```/g;
             let match;
             const results = [];
             while ((match = actionRegex.exec(text)) !== null) {
                 try {
                     const actionData = JSON.parse(match[1].trim());
-                    const result = executeAction(actionData);
+                    const result = await executeAction(actionData);
                     results.push({ action: actionData, ...result });
                 } catch (e) {
                     results.push({ error: `Failed to parse action: ${e.message}` });
@@ -232,7 +232,7 @@ const ChatWidget = () => {
 
             // After streaming complete, parse and execute any action blocks
             if (assistantContent) {
-                parseAndExecuteActions(assistantContent);
+                await parseAndExecuteActions(assistantContent);
             }
         } catch (err) {
             if (err.name !== "AbortError") {

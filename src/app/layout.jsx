@@ -1,5 +1,6 @@
 import { Figtree } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "../contexts/AuthContext";
 import { SidebarProvider } from "../contexts/SidebarContext";
 import { DataProvider } from "../contexts/DataContext";
 import MainLayout from "../components/layout/MainLayout";
@@ -24,11 +25,13 @@ export default function RootLayout({ children }) {
         suppressHydrationWarning={true}
       >
         <HydrationWarningSupressor>
-          <DataProvider>
-            <SidebarProvider>
-              <MainLayout>{children}</MainLayout>
-            </SidebarProvider>
-          </DataProvider>
+          <AuthProvider>
+            <DataProvider>
+              <SidebarProvider>
+                <MainLayout>{children}</MainLayout>
+              </SidebarProvider>
+            </DataProvider>
+          </AuthProvider>
         </HydrationWarningSupressor>
       </body>
     </html>

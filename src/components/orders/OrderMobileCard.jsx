@@ -2,11 +2,17 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LuPencil, LuTrash2, LuX } from "react-icons/lu";
+import { LuPencil, LuTrash2, LuX, LuEye } from "react-icons/lu";
 import { TbEdit } from "react-icons/tb";
 
-const OrderMobileCard = ({ order, index, onEdit, onDelete }) => {
-  const [showAttachment, setShowAttachment] = useState(false);
+const OrderMobileCard = ({
+  order,
+  index,
+  onEdit,
+  onDelete,
+  onViewAttachment,
+  canManage = true,
+}) => {
 
   const formatCurrency = (amount) => `₹${(amount || 0).toLocaleString()}`;
   const formatDate = (dateString) =>
@@ -58,22 +64,24 @@ const OrderMobileCard = ({ order, index, onEdit, onDelete }) => {
             Total: {formatCurrency(order.totalAmount)}
           </span>
         </div>
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={handleEdit}
-            className="p-2 hover:bg-white/10 rounded-full transition-colors"
-            title="Edit Order"
-          >
-            <TbEdit size={18} className="text-white" />
-          </button>
-          <button
-            onClick={handleDelete}
-            className="p-2 hover:bg-white/10 rounded-full transition-colors"
-            title="Delete Order"
-          >
-            <LuTrash2 size={18} className="text-white" />
-          </button>
-        </div>
+        {canManage && (
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={handleEdit}
+              className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              title="Edit Order"
+            >
+              <TbEdit size={18} className="text-white" />
+            </button>
+            <button
+              onClick={handleDelete}
+              className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              title="Delete Order"
+            >
+              <LuTrash2 size={18} className="text-white" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Data Grid - 2x3 layout */}
@@ -134,23 +142,56 @@ const OrderMobileCard = ({ order, index, onEdit, onDelete }) => {
 
       {/* Attachment Section (if exists) */}
       {(order.billAttachment || order.paymentAttachment) && (
-        <div className="border-t border-primary/30 pt-3">
-          <div className="flex items-center justify-between bg-secondary/50 rounded-lg p-3">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-red-500 rounded flex items-center justify-center">
-                <span className="text-white text-xs font-bold">PDF</span>
+        <div className="border-t border-primary/30 pt-3 space-y-2">
+          {order.billAttachment && (
+            <div className="flex items-center justify-between bg-secondary/60 rounded-lg p-2.5">
+              <div className="flex items-center space-x-2 truncate">
+                <span className="text-xs text-gray-300 font-medium">Bill:</span>
+                <span className="text-xs text-white truncate max-w-[140px]">
+                  {order.billAttachment.split("/").pop()}
+                </span>
               </div>
-              <span className="text-white text-sm font-medium">
-                {order.billAttachment ? "Bill.pdf" : "Payment.pdf"}
-              </span>
+              <button
+                type="button"
+                onClick={() =>
+                  onViewAttachment &&
+                  onViewAttachment(
+                    order.billAttachment,
+                    `Order ${order.orderId} - Bill Attachment`
+                  )
+                }
+                className="flex items-center space-x-1 px-2.5 py-1 rounded bg-accent/20 text-accent hover:bg-accent/30 text-xs font-medium cursor-pointer transition-colors flex-shrink-0"
+              >
+                <LuEye size={13} />
+                <span>View</span>
+              </button>
             </div>
-            <button
-              onClick={() => setShowAttachment(!showAttachment)}
-              className="p-1 hover:bg-white/10 rounded-full transition-colors"
-            >
-              <LuX size={16} className="text-gray-400" />
-            </button>
-          </div>
+          )}
+
+          {order.paymentAttachment && (
+            <div className="flex items-center justify-between bg-secondary/60 rounded-lg p-2.5">
+              <div className="flex items-center space-x-2 truncate">
+                <span className="text-xs text-gray-300 font-medium">Payment:</span>
+                <span className="text-xs text-white truncate max-w-[140px]">
+                  {order.paymentAttachment.split("/").pop()}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  onViewAttachment &&
+                  onViewAttachment(
+                    order.paymentAttachment,
+                    `Order ${order.orderId} - Payment Receipt`
+                  )
+                }
+                className="flex items-center space-x-1 px-2.5 py-1 rounded bg-accent/20 text-accent hover:bg-accent/30 text-xs font-medium cursor-pointer transition-colors flex-shrink-0"
+              >
+                <LuEye size={13} />
+                <span>View</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

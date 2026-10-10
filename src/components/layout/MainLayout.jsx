@@ -1,5 +1,7 @@
 "use client";
+
 import React from "react";
+import { usePathname } from "next/navigation";
 import Navbar from "../shared/navbar";
 import Sidebar from "../shared/sidebar";
 import ChatWidget from "../chatbot/ChatWidget";
@@ -7,7 +9,12 @@ import { useSidebar } from "../../contexts/SidebarContext";
 import "../../styles/layout.css";
 
 const MainLayout = ({ children }) => {
+  const pathname = usePathname();
   const { sidebarExpanded, isMobile, isClient, toggleSidebar } = useSidebar();
+
+  if (pathname === "/login") {
+    return <div className="min-h-screen bg-[#0B0814]">{children}</div>;
+  }
 
   return (
     <div
@@ -15,7 +22,7 @@ const MainLayout = ({ children }) => {
         }`}
     >
       <Navbar onMenuClick={toggleSidebar} isMobile={isMobile} />
-      <div className="flex">
+      <div className="flex pt-[62px]">
         <Sidebar
           isExpanded={sidebarExpanded}
           setIsExpanded={toggleSidebar}

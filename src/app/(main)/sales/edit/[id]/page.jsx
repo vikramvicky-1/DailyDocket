@@ -2,18 +2,22 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { LuUpload, LuSave, LuArrowLeft, LuX } from "react-icons/lu";
+import { LuSave, LuArrowLeft } from "react-icons/lu";
 import { MdKeyboardArrowRight } from "react-icons/md";
 import CustomDatePicker from "../../../../../components/ui/CustomDatePicker";
+import AttachmentUploader from "../../../../../components/ui/AttachmentUploader";
+import PermissionGuard from "../../../../../components/shared/PermissionGuard";
+import { useData } from "../../../../../contexts/DataContext";
 
 const EditSalePage = () => {
   const router = useRouter();
   const params = useParams();
   const { id } = params;
+  const { sales, updateSale } = useData();
 
   // Form state
   const [formData, setFormData] = useState({
-    date: null,
+    date: new Date(),
     openingCash: "",
     purchaseCash: "",
     onlineCash: "",
@@ -23,44 +27,78 @@ const EditSalePage = () => {
     totalSale: "",
   });
 
-  const [file, setFile] = useState(null);
-  const [dragActive, setDragActive] = useState(false);
+  const [attachmentUrl, setAttachmentUrl] = useState(null);
+  const [isUploadingAttachment, setIsUploadingAttachment] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  // Mock data - In real app, this would come from API
-  const mockSaleData = {
-    date: new Date("2025-09-25"),
-    openingCash: "890",
-    purchaseCash: "1890",
-    onlineCash: "5890",
-    physicalCash: "1890",
-    cashTransferred: "1890",
-    closingCash: "50",
-    totalSale: "11000",
-    attachment: null,
-  };
-
-  // Load existing sale data
+  // Load existing sale data from MongoDB
   useEffect(() => {
     const loadSaleData = async () => {
       setLoading(true);
-      // In real app, fetch data based on id
-      setFormData(mockSaleData);
-      setLoading(false);
+      try {
+        // Try to find in memory first
+        const found = sales.find((s) => s._id === id || s.id === id);
+        if (found) {
+          setFormData({
+            date: found.date ? new Date(found.date) : new Date(),
+            openingCash: (found.openingCash ?? found.opening ?? 0).toString(),
+            purchaseCash: (found.purchaseCash ?? found.purchase ?? 0).toString(),
+            onlineCash: (found.onlineCash ?? found.onlinePayment ?? 0).toString(),
+            physicalCash: (found.physicalCash ?? found.cashPayment ?? 0).toString(),
+            cashTransferred: (found.cashTransferred ?? found.transferred ?? 0).toString(),
+            closingCash: (found.closingCash ?? found.closing ?? 0).toString(),
+            totalSale: (found.totalSales ?? found.totalSale ?? 0).toString(),
+          });
+          setAttachmentUrl(found.attachment);
+          setLoading(false);
+          return;
+        }
+
+        // Fetch from API
+        const res = await fetch(`/api/sales/${id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setFormData({
+            date: data.date ? new Date(data.date) : new Date(),
+            openingCash: (data.openingCash ?? data.opening ?? 0).toString(),
+            purchaseCash: (data.purchaseCash ?? data.purchase ?? 0).toString(),
+            onlineCash: (data.onlineCash ?? data.onlinePayment ?? 0).toString(),
+            physicalCash: (data.physicalCash ?? data.cashPayment ?? 0).toString(),
+            cashTransferred: (data.cashTransferred ?? data.transferred ?? 0).toString(),
+            closingCash: (data.closingCash ?? data.closing ?? 0).toString(),
+            totalSale: (data.totalSales ?? data.totalSale ?? 0).toString(),
+          });
+          setAttachmentUrl(data.attachment);
+        } else {
+          setError("Sale record not found");
+        }
+      } catch (err) {
+        console.error("Error loading sale:", err);
+        setError("Failed to load sale details");
+      } finally {
+        setLoading(false);
+      }
     };
 
     if (id) {
       loadSaleData();
     }
-  }, [id]);
+  }, [id, sales]);
 
   // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => {
+      const updated = { ...prev, [name]: value };
+      if (name === "onlineCash" || name === "physicalCash") {
+        const online = name === "onlineCash" ? Number(value) || 0 : Number(prev.onlineCash) || 0;
+        const physical = name === "physicalCash" ? Number(value) || 0 : Number(prev.physicalCash) || 0;
+        updated.totalSale = (online + physical).toString();
+      }
+      return updated;
+    });
   };
 
   // Handle date change
@@ -71,121 +109,67 @@ const EditSalePage = () => {
     }));
   };
 
-  // Handle file upload
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      if (selectedFile.size > 10 * 1024 * 1024) {
-        // 10MB limit
-        alert("File size must be less than 10MB");
-        return;
-      }
-
-      const allowedTypes = [
-        "application/pdf",
-        "application/msword",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "image/png",
-        "image/jpeg",
-      ];
-      if (!allowedTypes.includes(selectedFile.type)) {
-        alert("Only PDF, Word, PNG, and JPG files are allowed");
-        return;
-      }
-
-      setFile(selectedFile);
-    }
-  };
-
-  // Handle drag and drop
-  const handleDrag = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const droppedFile = e.dataTransfer.files[0];
-      if (droppedFile.size > 10 * 1024 * 1024) {
-        alert("File size must be less than 10MB");
-        return;
-      }
-
-      const allowedTypes = [
-        "application/pdf",
-        "application/msword",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "image/png",
-        "image/jpeg",
-      ];
-      if (!allowedTypes.includes(droppedFile.type)) {
-        alert("Only PDF, Word, PNG, and JPG files are allowed");
-        return;
-      }
-
-      setFile(droppedFile);
-    }
-  };
-
-  // Remove uploaded file
-  const handleRemoveFile = () => {
-    setFile(null);
-  };
-
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Here you would typically send the data to your API
-    console.log("Form submitted:", { formData, file });
-    // For now, just show a success message and redirect
-    alert("Sale updated successfully!");
-    router.push("/sales");
+    if (!isFormValid() || submitting || isUploadingAttachment) return;
+
+    try {
+      setSubmitting(true);
+      setError("");
+
+      await updateSale(id, {
+        date: formData.date,
+        openingCash: formData.openingCash,
+        purchaseCash: formData.purchaseCash,
+        onlineCash: formData.onlineCash,
+        physicalCash: formData.physicalCash,
+        cashTransferred: formData.cashTransferred,
+        closingCash: formData.closingCash,
+        totalSale: formData.totalSale,
+        attachment: attachmentUrl,
+      });
+
+      router.push("/sales");
+    } catch (err) {
+      console.error("Failed to update sale:", err);
+      setError(err.message || "Failed to update sale record");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  // Handle cancel
   const handleCancel = () => {
     router.push("/sales");
   };
 
-  // Check if all required fields are filled
   const isFormValid = () => {
     return (
       formData.date !== null &&
-      formData.openingCash.trim() !== "" &&
-      formData.purchaseCash.trim() !== "" &&
-      formData.onlineCash.trim() !== "" &&
-      formData.physicalCash.trim() !== "" &&
-      formData.cashTransferred.trim() !== "" &&
-      formData.closingCash.trim() !== "" &&
-      formData.totalSale.trim() !== ""
+      formData.openingCash.toString().trim() !== "" &&
+      formData.purchaseCash.toString().trim() !== "" &&
+      formData.onlineCash.toString().trim() !== "" &&
+      formData.physicalCash.toString().trim() !== "" &&
+      formData.cashTransferred.toString().trim() !== "" &&
+      formData.closingCash.toString().trim() !== "" &&
+      formData.totalSale.toString().trim() !== ""
     );
   };
 
   if (loading) {
     return (
-      <div className="w-full flex flex-col">
-        <div className="flex-1 flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto mb-4"></div>
-            <p className="text-text-primary/70">Loading sale data...</p>
-          </div>
+      <div className="w-full flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto mb-4" />
+          <p className="text-text-primary/70">Loading sale details from database...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full flex flex-col">
-      {/* Sticky Header with Breadcrumb Navigation and Action Buttons */}
+    <PermissionGuard moduleKey="sales" requiredAction="manage">
+      <div className="w-full flex flex-col">
       <div className="mb-6 min-w-0">
         <div className="flex items-center justify-between min-w-0">
           <div className="flex items-center gap-2 text-text-primary min-w-0 flex-1">
@@ -208,7 +192,6 @@ const EditSalePage = () => {
             </h1>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex items-center gap-1 sm:gap-2 md:gap-4 flex-shrink-0 ml-1 sm:ml-2">
             <button
               type="button"
@@ -220,41 +203,47 @@ const EditSalePage = () => {
             <button
               type="submit"
               form="edit-sale-form"
-              disabled={!isFormValid()}
+              disabled={!isFormValid() || submitting || isUploadingAttachment}
               className={`flex items-center gap-0.5 sm:gap-1 md:gap-2 px-1.5 sm:px-2 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-lg transition-colors font-medium text-xs sm:text-sm md:text-base whitespace-nowrap ${
-                isFormValid()
+                isFormValid() && !submitting && !isUploadingAttachment
                   ? "cursor-pointer bg-accent hover:bg-accent/90 text-white"
-                  : "cursor-not-allowed bg-accent text-white"
+                  : "cursor-not-allowed bg-accent/50 text-white/70"
               }`}
             >
               <LuSave size={16} className="sm:w-[18px] sm:h-[18px]" />
-              <span className="hidden xs:inline">Update Sale</span>
-              <span className="xs:hidden">Update</span>
+              <span>
+                {isUploadingAttachment
+                  ? "Uploading..."
+                  : submitting
+                  ? "Updating..."
+                  : "Update Sale"}
+              </span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Form Container - matches table container pattern exactly */}
-      <div className="flex-1 min-h-0 ">
+      {error && (
+        <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/40 text-red-400 text-sm">
+          ⚠️ {error}
+        </div>
+      )}
+
+      <div className="flex-1 min-h-0">
         <div className="bg-secondary rounded-xl p-3 sm:p-4 md:p-6 lg:p-5 flex flex-col h-full">
-          {/* Static Header Section - will NOT scroll */}
           <div className="pb-4">
             <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-text-primary">
-              Edit Sale
+              Edit Sale Details
             </h1>
           </div>
 
-          {/* Scrollable Content Area - matches table scrolling behavior */}
           <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar max-h-[650px] md:max-h-[500px] lg:max-h-[510px]">
             <form
               id="edit-sale-form"
               onSubmit={handleSubmit}
               className="space-y-5 lg:space-y-6 min-w-0"
             >
-              {/* Form Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5 min-w-0">
-                {/* Date Field */}
                 <div className="space-y-2 min-w-0">
                   <label className="block text-sm font-medium text-text-primary">
                     Date <span className="text-red-500">*</span>
@@ -268,10 +257,9 @@ const EditSalePage = () => {
                   />
                 </div>
 
-                {/* Opening Cash Field */}
                 <div className="space-y-2 min-w-0">
                   <label className="block text-sm font-medium text-text-primary">
-                    Opening Cash <span className="text-red-500">*</span>
+                    Opening Cash (₹) <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -284,10 +272,9 @@ const EditSalePage = () => {
                   />
                 </div>
 
-                {/* Purchase Cash Field */}
                 <div className="space-y-2 min-w-0">
                   <label className="block text-sm font-medium text-text-primary">
-                    Purchase Cash <span className="text-red-500">*</span>
+                    Purchase Cash (₹) <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -300,10 +287,9 @@ const EditSalePage = () => {
                   />
                 </div>
 
-                {/* Online Cash Field */}
                 <div className="space-y-2 min-w-0">
                   <label className="block text-sm font-medium text-text-primary">
-                    Online Cash <span className="text-red-500">*</span>
+                    Online Cash (₹) <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -316,10 +302,9 @@ const EditSalePage = () => {
                   />
                 </div>
 
-                {/* Physical Cash Field */}
                 <div className="space-y-2 min-w-0">
                   <label className="block text-sm font-medium text-text-primary">
-                    Physical Cash <span className="text-red-500">*</span>
+                    Physical Cash (₹) <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -332,10 +317,9 @@ const EditSalePage = () => {
                   />
                 </div>
 
-                {/* Cash Transferred Field */}
                 <div className="space-y-2 min-w-0">
                   <label className="block text-sm font-medium text-text-primary">
-                    Cash Transferred <span className="text-red-500">*</span>
+                    Cash Transferred (₹) <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -348,10 +332,9 @@ const EditSalePage = () => {
                   />
                 </div>
 
-                {/* Closing Cash Field */}
                 <div className="space-y-2 min-w-0">
                   <label className="block text-sm font-medium text-text-primary">
-                    Closing Cash <span className="text-red-500">*</span>
+                    Closing Cash (₹) <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -364,10 +347,9 @@ const EditSalePage = () => {
                   />
                 </div>
 
-                {/* Total Sale Field */}
                 <div className="space-y-2 min-w-0">
                   <label className="block text-sm font-medium text-text-primary">
-                    Total Sale <span className="text-red-500">*</span>
+                    Total Sale (₹) <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -381,82 +363,25 @@ const EditSalePage = () => {
                 </div>
               </div>
 
-              {/* File Upload Section */}
-              <div className="space-y-2 mt-6 min-w-0">
-                <label className="block text-sm font-medium text-text-primary">
-                  Upload File
-                </label>
-                <div
-                  className={`relative w-full h-20 sm:h-24 lg:h-[98px] border-2 border-dashed rounded-lg transition-colors ${
-                    dragActive
-                      ? "border-accent bg-accent/10"
-                      : "border-[#545454] hover:border-gray-400"
-                  } ${file ? "bg-accent/5" : ""}`}
-                  onDragEnter={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDragOver={handleDrag}
-                  onDrop={handleDrop}
-                >
-                  <input
-                    type="file"
-                    accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
-                    onChange={handleFileChange}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  />
-                  <div className="flex flex-col items-center justify-center h-full text-center p-2 sm:p-4">
-                    <LuUpload className="w-4 sm:w-6 h-4 sm:h-6 text-accent mb-1 sm:mb-2" />
-                    <p className="text-xs sm:text-sm text-gray-300">
-                      <span className="text-accent cursor-pointer hover:underline">
-                        Choose File
-                      </span>{" "}
-                      <span className="hidden xs:inline">
-                        / Drag and Drop Files Here
-                      </span>
-                    </p>
-                    <p className="text-[10px] sm:text-xs text-gray-400 mt-1 leading-tight">
-                      PDF, Word, PNG, JPG • Max. 10MB
-                    </p>
-                  </div>
-                  {file && (
-                    <div className="absolute bottom-2 left-2 right-2 bg-primary rounded px-2 py-1">
-                      <p className="text-xs text-text-primary truncate">
-                        {file.name}
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Show uploaded file with remove option */}
-                {file && (
-                  <div className="mt-4">
-                    <div className="flex items-center gap-2 p-3 bg-primary rounded-lg">
-                      <div className="flex items-center gap-2 flex-1">
-                        <div className="w-8 h-8 bg-red-500 rounded flex items-center justify-center flex-shrink-0">
-                          <span className="text-white text-xs font-medium">
-                            {file.name.split(".").pop().toUpperCase()}
-                          </span>
-                        </div>
-                        <span className="text-sm text-text-primary truncate">
-                          {file.name}
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleRemoveFile}
-                        className="text-gray-400 hover:text-red-400 transition-colors flex-shrink-0"
-                      >
-                        <LuX size={16} />
-                      </button>
-                    </div>
-                  </div>
-                )}
+              {/* Attachment Section with live upload loading status */}
+              <div className="mt-6 min-w-0">
+                <AttachmentUploader
+                  label="Upload Attachment (Receipt / Bill)"
+                  value={attachmentUrl}
+                  onChange={(url) => setAttachmentUrl(url)}
+                  onUploadStateChange={setIsUploadingAttachment}
+                  accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                  helpText="Supported: PDF, Word, PNG, JPG • Max 12MB"
+                  placeholderText="Drag and Drop Attachment Here / Choose File"
+                />
               </div>
             </form>
           </div>
         </div>
       </div>
     </div>
-  );
+  </PermissionGuard>
+);
 };
 
 export default EditSalePage;

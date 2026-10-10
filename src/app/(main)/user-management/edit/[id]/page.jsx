@@ -3,67 +3,122 @@
 import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
-  LuUpload,
   LuSave,
   LuArrowLeft,
   LuEye,
   LuEyeOff,
-  LuX,
 } from "react-icons/lu";
 import { MdKeyboardArrowRight } from "react-icons/md";
 import CustomDropdown from "../../../../../components/ui/CustomDropdown";
+import AttachmentUploader from "../../../../../components/ui/AttachmentUploader";
+import PermissionsSelector from "../../../../../components/user-management/PermissionsSelector";
+import PermissionGuard from "../../../../../components/shared/PermissionGuard";
+import { useData } from "../../../../../contexts/DataContext";
 
 const EditUserPage = () => {
   const router = useRouter();
   const params = useParams();
   const { id } = params;
+  const { users, updateUser } = useData();
 
   // Form state
   const [formData, setFormData] = useState({
     fullName: "",
     emailAddress: "",
     password: "",
-    role: "",
+    role: "Staff",
   });
 
-  const [profilePicture, setProfilePicture] = useState(null);
-  const [dragActive, setDragActive] = useState(false);
+  const [permissions, setPermissions] = useState({
+    sales: { view: false, manage: false },
+    orders: { view: false, manage: false },
+    expenses: { view: false, manage: false },
+    categories: { view: false, manage: false },
+    userManagement: { view: false, manage: false },
+  });
+  const [isDefaultAdmin, setIsDefaultAdmin] = useState(false);
+
+  const [profilePictureUrl, setProfilePictureUrl] = useState("");
+  const [isUploadingPic, setIsUploadingPic] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  // Role options
   const roleOptions = [
-    { value: "accountant", label: "Accountant" },
-    { value: "administrator", label: "Administrator" },
-    { value: "staff", label: "Staff" },
+    { value: "Administrator", label: "Administrator" },
+    { value: "Staff", label: "Staff" },
+    { value: "Accountant", label: "Accountant" },
   ];
 
-  // Mock data - In real app, this would come from API
-  const mockUserData = {
-    fullName: "Neeti Mohan",
-    emailAddress: "neetimohan@gmail.com",
-    password: "password123",
-    role: "staff",
-  };
-
-  // Load existing user data
+  // Load existing user from MongoDB
   useEffect(() => {
     const loadUserData = async () => {
       setLoading(true);
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      try {
+        const found = users.find((u) => u._id === id || u.id === id);
+        if (found) {
+          setFormData({
+            fullName: found.fullName || found.name || "",
+            emailAddress: found.emailAddress || found.email || "",
+            password: "",
+            role: found.role || "Staff",
+          });
+          setProfilePictureUrl(found.profilePicture || "");
+          if (found.permissions) {
+            setPermissions(found.permissions);
+          }
+          setIsDefaultAdmin(
+            Boolean(
+              found.isDefaultAdmin ||
+                (found.emailAddress &&
+                  found.emailAddress.toLowerCase() === "admin@dailydocket.com") ||
+                (found.email &&
+                  found.email.toLowerCase() === "admin@dailydocket.com")
+            )
+          );
+          setLoading(false);
+          return;
+        }
 
-      // In real app, fetch data based on id
-      setFormData(mockUserData);
-      setLoading(false);
+        const res = await fetch(`/api/users/${id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setFormData({
+            fullName: data.fullName || data.name || "",
+            emailAddress: data.emailAddress || data.email || "",
+            password: "",
+            role: data.role || "Staff",
+          });
+          setProfilePictureUrl(data.profilePicture || "");
+          if (data.permissions) {
+            setPermissions(data.permissions);
+          }
+          setIsDefaultAdmin(
+            Boolean(
+              data.isDefaultAdmin ||
+                (data.emailAddress &&
+                  data.emailAddress.toLowerCase() === "admin@dailydocket.com") ||
+                (data.email &&
+                  data.email.toLowerCase() === "admin@dailydocket.com")
+            )
+          );
+        } else {
+          setError("User record not found");
+        }
+      } catch (err) {
+        console.error("Error loading user:", err);
+        setError("Failed to load user details");
+      } finally {
+        setLoading(false);
+      }
     };
 
     if (id) {
       loadUserData();
     }
-  }, [id]);
+  }, [id, users]);
 
-  // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -72,120 +127,67 @@ const EditUserPage = () => {
     }));
   };
 
-  // Handle file upload
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      if (selectedFile.size > 12 * 1024 * 1024) {
-        alert("File size must be less than 12MB");
-        return;
-      }
-
-      const allowedTypes = [
-        "application/pdf",
-        "application/vnd.ms-excel",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "image/png",
-        "image/jpeg",
-      ];
-      if (!allowedTypes.includes(selectedFile.type)) {
-        alert("Only PDF, Excel, PNG, and JPG files are allowed");
-        return;
-      }
-
-      setProfilePicture(selectedFile);
-    }
-  };
-
-  // Handle drag and drop
-  const handleDrag = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const droppedFile = e.dataTransfer.files[0];
-      if (droppedFile.size > 12 * 1024 * 1024) {
-        alert("File size must be less than 12MB");
-        return;
-      }
-
-      const allowedTypes = [
-        "application/pdf",
-        "application/vnd.ms-excel",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "image/png",
-        "image/jpeg",
-      ];
-      if (!allowedTypes.includes(droppedFile.type)) {
-        alert("Only PDF, Excel, PNG, and JPG files are allowed");
-        return;
-      }
-
-      setProfilePicture(droppedFile);
-    }
-  };
-
-  // Remove uploaded file
-  const handleRemoveFile = () => {
-    setProfilePicture(null);
-  };
-
-  // Toggle password visibility
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted:", { formData, profilePicture });
-    alert("User updated successfully!");
-    router.push("/user-management");
+    if (
+      !formData.fullName.trim() ||
+      !formData.emailAddress.trim() ||
+      submitting ||
+      isUploadingPic
+    ) {
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setError("");
+
+      const payload = {
+        fullName: formData.fullName,
+        emailAddress: formData.emailAddress,
+        role: formData.role,
+        profilePicture: profilePictureUrl || "",
+        permissions,
+      };
+
+      // Only send password if updated
+      if (formData.password.trim() !== "") {
+        payload.password = formData.password.trim();
+      }
+
+      await updateUser(id, payload);
+      router.push("/user-management");
+    } catch (err) {
+      console.error("Failed to update user:", err);
+      setError(err.message || "Failed to update user details in database.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  // Handle cancel
   const handleCancel = () => {
     router.push("/user-management");
   };
 
-  // Check if all required fields are filled
-  const isFormValid = () => {
-    return (
-      formData.fullName.trim() !== "" &&
-      formData.emailAddress.trim() !== "" &&
-      formData.password.trim() !== "" &&
-      formData.role !== ""
-    );
-  };
-
   if (loading) {
     return (
-      <div className="w-full flex flex-col">
-        <div className="flex-1 flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto mb-4"></div>
-            <p className="text-text-primary/70">Loading user data...</p>
-          </div>
+      <div className="w-full flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto mb-4" />
+          <p className="text-text-primary/70">Loading user details from database...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full flex flex-col">
-      {/* Sticky Header with Breadcrumb Navigation and Action Buttons */}
-      <div className="mb-6 min-w-0">
+    <PermissionGuard moduleKey="userManagement" requiredAction="manage">
+      <div className="w-full flex flex-col">
+        <div className="mb-6 min-w-0">
         <div className="flex items-center justify-between min-w-0">
           <div className="flex items-center gap-2 text-text-primary min-w-0 flex-1">
             <button
@@ -207,7 +209,6 @@ const EditUserPage = () => {
             </h1>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex items-center gap-1 sm:gap-2 md:gap-4 flex-shrink-0 ml-1 sm:ml-2">
             <button
               type="button"
@@ -219,57 +220,62 @@ const EditUserPage = () => {
             <button
               type="submit"
               form="edit-user-form"
-              disabled={!isFormValid()}
+              disabled={submitting || isUploadingPic}
               className={`flex items-center gap-0.5 sm:gap-1 md:gap-2 px-1.5 sm:px-2 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-lg transition-colors font-medium text-xs sm:text-sm md:text-base whitespace-nowrap ${
-                isFormValid()
+                !submitting && !isUploadingPic
                   ? "cursor-pointer bg-accent hover:bg-accent/90 text-white"
-                  : "cursor-not-allowed bg-accent text-white"
+                  : "cursor-not-allowed bg-accent/50 text-white/70"
               }`}
             >
               <LuSave size={16} className="sm:w-[18px] sm:h-[18px]" />
-              <span className="hidden xs:inline">Update User</span>
-              <span className="xs:hidden">Update</span>
+              <span>
+                {isUploadingPic
+                  ? "Uploading..."
+                  : submitting
+                  ? "Updating..."
+                  : "Update User"}
+              </span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Form Container - matches table container pattern exactly */}
-      <div className="flex-1 min-h-0 ">
+      {error && (
+        <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/40 text-red-400 text-sm">
+          ⚠️ {error}
+        </div>
+      )}
+
+      <div className="flex-1 min-h-0">
         <div className="bg-secondary rounded-xl p-3 sm:p-4 md:p-6 lg:p-5 flex flex-col h-full">
-          {/* Static Header Section - will NOT scroll */}
           <div className="pb-4">
             <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-text-primary">
-              Edit User
+              Edit User Details
             </h1>
           </div>
 
-          {/* Scrollable Content Area - matches table scrolling behavior */}
           <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar max-h-[500px] md:max-h-[500px] lg:max-h-[450px]">
             <form
               id="edit-user-form"
               onSubmit={handleSubmit}
               className="space-y-5 lg:space-y-6 min-w-0"
             >
-              {/* Form Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5 min-w-0">
-                {/* Full Name Field */}
                 <div className="space-y-2 min-w-0">
                   <label className="block text-sm font-medium text-text-primary">
-                    Full name <span className="text-red-500">*</span>
+                    Full Name <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     name="fullName"
                     value={formData.fullName}
                     onChange={handleInputChange}
-                    placeholder="Neeti Mohan"
+                    placeholder="Full name"
                     required
                     className="w-full h-10 sm:h-11 px-3 sm:px-5 py-2 sm:py-2.5 bg-form-bg border border-[#545454] rounded-lg text-text-primary placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                   />
                 </div>
 
-                {/* Email Address Field */}
                 <div className="space-y-2 min-w-0">
                   <label className="block text-sm font-medium text-text-primary">
                     Email Address <span className="text-red-500">*</span>
@@ -279,16 +285,15 @@ const EditUserPage = () => {
                     name="emailAddress"
                     value={formData.emailAddress}
                     onChange={handleInputChange}
-                    placeholder="Neetimohan@gmail.com"
+                    placeholder="user@example.com"
                     required
                     className="w-full h-10 sm:h-11 px-3 sm:px-5 py-2 sm:py-2.5 bg-form-bg border border-[#545454] rounded-lg text-text-primary placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                   />
                 </div>
 
-                {/* Password Field */}
                 <div className="space-y-2 min-w-0">
                   <label className="block text-sm font-medium text-text-primary">
-                    Password <span className="text-red-500">*</span>
+                    Password <span className="text-xs text-gray-400">(leave blank to keep current)</span>
                   </label>
                   <div className="relative">
                     <input
@@ -297,7 +302,6 @@ const EditUserPage = () => {
                       value={formData.password}
                       onChange={handleInputChange}
                       placeholder="••••••••••"
-                      required
                       className="w-full h-10 sm:h-11 px-3 sm:px-5 py-2 sm:py-2.5 pr-10 sm:pr-12 bg-form-bg border border-[#545454] rounded-lg text-text-primary placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                     />
                     <button
@@ -305,20 +309,22 @@ const EditUserPage = () => {
                       onClick={togglePasswordVisibility}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
                     >
-                      {showPassword ? (
-                        <LuEyeOff size={18} />
-                      ) : (
-                        <LuEye size={18} />
-                      )}
+                      {showPassword ? <LuEyeOff size={18} /> : <LuEye size={18} />}
                     </button>
                   </div>
                 </div>
 
-                {/* Role Dropdown */}
                 <div className="space-y-2 min-w-0">
-                  <label className="block text-sm font-medium text-text-primary">
-                    Role <span className="text-red-500">*</span>
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="block text-sm font-medium text-text-primary">
+                      Role <span className="text-red-500">*</span>
+                    </label>
+                    {isDefaultAdmin && (
+                      <span className="text-[11px] text-amber-400 font-medium">
+                        Default Admin Locked
+                      </span>
+                    )}
+                  </div>
                   <CustomDropdown
                     name="role"
                     value={formData.role}
@@ -326,86 +332,41 @@ const EditUserPage = () => {
                     options={roleOptions}
                     placeholder="Select Role"
                     required
+                    disabled={isDefaultAdmin}
                   />
                 </div>
               </div>
 
-              {/* File Upload Section */}
-              <div className="space-y-2 mt-6 min-w-0">
-                <label className="block text-sm font-medium text-text-primary">
-                  Upload Profile Picture
-                </label>
-                <div
-                  className={`relative w-full h-20 sm:h-24 lg:h-[98px] border-2 border-dashed rounded-lg transition-colors ${
-                    dragActive
-                      ? "border-accent bg-accent/10"
-                      : "border-[#545454] hover:border-gray-400"
-                  } ${profilePicture ? "bg-accent/5" : ""}`}
-                  onDragEnter={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDragOver={handleDrag}
-                  onDrop={handleDrop}
-                >
-                  <input
-                    type="file"
-                    accept=".pdf,.xls,.xlsx,.png,.jpg,.jpeg"
-                    onChange={handleFileChange}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  />
-                  <div className="flex flex-col items-center justify-center h-full text-center p-2 sm:p-4">
-                    <LuUpload className="w-4 sm:w-6 h-4 sm:h-6 text-accent mb-1 sm:mb-2" />
-                    <p className="text-xs sm:text-sm text-gray-300">
-                      <span className="text-accent cursor-pointer hover:underline">
-                        Choose File
-                      </span>{" "}
-                      <span className="hidden xs:inline">
-                        / Drag and Drop Files Here
-                      </span>
-                    </p>
-                    <p className="text-[10px] sm:text-xs text-gray-400 mt-1 leading-tight">
-                      Excel, pdf, PNG, JPG • Max. 12MB
-                    </p>
-                  </div>
-                  {profilePicture && (
-                    <div className="absolute bottom-2 left-2 right-2 bg-primary rounded px-2 py-1">
-                      <p className="text-xs text-text-primary truncate">
-                        {profilePicture.name}
-                      </p>
-                    </div>
-                  )}
-                </div>
+              {/* Picture Upload with live upload loading status */}
+              <div className="mt-6 min-w-0">
+                <AttachmentUploader
+                  label="Profile Picture"
+                  value={profilePictureUrl}
+                  onChange={(url) => setProfilePictureUrl(url)}
+                  onUploadStateChange={setIsUploadingPic}
+                  accept=".png,.jpg,.jpeg,.webp"
+                  helpText="Supported: PNG, JPG, JPEG • Max 12MB"
+                  placeholderText="Choose Photo / Drag and Drop Photo Here"
+                />
+              </div>
 
-                {/* Show uploaded file with remove option */}
-                {profilePicture && (
-                  <div className="mt-4">
-                    <div className="flex items-center gap-2 p-3 bg-primary rounded-lg">
-                      <div className="flex items-center gap-2 flex-1">
-                        <div className="w-8 h-8 bg-red-500 rounded flex items-center justify-center flex-shrink-0">
-                          <span className="text-white text-xs font-medium">
-                            {profilePicture.name.split(".").pop().toUpperCase()}
-                          </span>
-                        </div>
-                        <span className="text-sm text-text-primary truncate">
-                          {profilePicture.name}
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleRemoveFile}
-                        className="text-gray-400 hover:text-red-400 transition-colors flex-shrink-0"
-                      >
-                        <LuX size={16} />
-                      </button>
-                    </div>
-                  </div>
-                )}
+              {/* RBAC Permissions Section */}
+              <div className="mt-6 min-w-0">
+                <PermissionsSelector
+                  permissions={permissions}
+                  onChange={setPermissions}
+                  role={formData.role}
+                  isDefaultAdmin={isDefaultAdmin}
+                  disabled={isDefaultAdmin}
+                />
               </div>
             </form>
           </div>
         </div>
       </div>
     </div>
-  );
+  </PermissionGuard>
+);
 };
 
 export default EditUserPage;

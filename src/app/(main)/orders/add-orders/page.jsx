@@ -2,45 +2,50 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LuUpload, LuSave, LuArrowLeft } from "react-icons/lu";
+import { LuSave, LuArrowLeft } from "react-icons/lu";
 import { MdKeyboardArrowRight } from "react-icons/md";
 import CustomDatePicker from "../../../../components/ui/CustomDatePicker";
 import CustomDropdown from "../../../../components/ui/CustomDropdown";
+import AttachmentUploader from "../../../../components/ui/AttachmentUploader";
+import PermissionGuard from "../../../../components/shared/PermissionGuard";
+import { useData } from "../../../../contexts/DataContext";
 
 const AddOrdersPage = () => {
   const router = useRouter();
+  const { addOrder } = useData();
 
   // Form state
   const [formData, setFormData] = useState({
-    date: null,
-    deliveryDate: null,
+    date: new Date(),
+    deliveryDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
     orderId: "",
     customerName: "",
     amount: "",
-    paymentMode: "",
-    orderStatus: "",
+    paymentMode: "Online",
+    orderStatus: "Order Received",
   });
 
-  const [billFile, setBillFile] = useState(null);
-  const [paymentFile, setPaymentFile] = useState(null);
-  const [billDragActive, setBillDragActive] = useState(false);
-  const [paymentDragActive, setPaymentDragActive] = useState(false);
+  const [billAttachmentUrl, setBillAttachmentUrl] = useState(null);
+  const [paymentAttachmentUrl, setPaymentAttachmentUrl] = useState(null);
+  const [isUploadingBill, setIsUploadingBill] = useState(false);
+  const [isUploadingPayment, setIsUploadingPayment] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  // Payment mode options
+  const isUploadingAny = isUploadingBill || isUploadingPayment;
+
   const paymentModeOptions = [
-    { value: "online", label: "Online" },
-    { value: "cash", label: "Cash" },
+    { value: "Online", label: "Online" },
+    { value: "Cash", label: "Cash" },
   ];
 
-  // Order status options
   const orderStatusOptions = [
-    { value: "completed", label: "Completed" },
-    { value: "cancelled", label: "Cancelled" },
-    { value: "out-for-delivery", label: "Out for Delivery" },
-    { value: "order-received", label: "Order Received" },
+    { value: "Order Received", label: "Order Received" },
+    { value: "Out for Delivery", label: "Out for Delivery" },
+    { value: "Completed", label: "Completed" },
+    { value: "Cancelled", label: "Cancelled" },
   ];
 
-  // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -49,7 +54,6 @@ const AddOrdersPage = () => {
     }));
   };
 
-  // Handle date changes
   const handleDateChange = (date) => {
     setFormData((prev) => ({
       ...prev,
@@ -64,140 +68,40 @@ const AddOrdersPage = () => {
     }));
   };
 
-  // Handle file upload for bill
-  const handleBillFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      if (selectedFile.size > 12 * 1024 * 1024) {
-        alert("File size must be less than 12MB");
-        return;
-      }
-
-      const allowedTypes = [
-        "application/pdf",
-        "application/vnd.ms-excel",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      ];
-      if (!allowedTypes.includes(selectedFile.type)) {
-        alert("Only PDF and Excel files are allowed");
-        return;
-      }
-
-      setBillFile(selectedFile);
-    }
-  };
-
-  // Handle file upload for payment
-  const handlePaymentFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      if (selectedFile.size > 12 * 1024 * 1024) {
-        alert("File size must be less than 12MB");
-        return;
-      }
-
-      const allowedTypes = [
-        "application/pdf",
-        "application/vnd.ms-excel",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      ];
-      if (!allowedTypes.includes(selectedFile.type)) {
-        alert("Only PDF and Excel files are allowed");
-        return;
-      }
-
-      setPaymentFile(selectedFile);
-    }
-  };
-
-  // Handle drag and drop for bill
-  const handleBillDrag = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setBillDragActive(true);
-    } else if (e.type === "dragleave") {
-      setBillDragActive(false);
-    }
-  };
-
-  const handleBillDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setBillDragActive(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const droppedFile = e.dataTransfer.files[0];
-      if (droppedFile.size > 12 * 1024 * 1024) {
-        alert("File size must be less than 12MB");
-        return;
-      }
-
-      const allowedTypes = [
-        "application/pdf",
-        "application/vnd.ms-excel",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      ];
-      if (!allowedTypes.includes(droppedFile.type)) {
-        alert("Only PDF and Excel files are allowed");
-        return;
-      }
-
-      setBillFile(droppedFile);
-    }
-  };
-
-  // Handle drag and drop for payment
-  const handlePaymentDrag = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setPaymentDragActive(true);
-    } else if (e.type === "dragleave") {
-      setPaymentDragActive(false);
-    }
-  };
-
-  const handlePaymentDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setPaymentDragActive(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const droppedFile = e.dataTransfer.files[0];
-      if (droppedFile.size > 12 * 1024 * 1024) {
-        alert("File size must be less than 12MB");
-        return;
-      }
-
-      const allowedTypes = [
-        "application/pdf",
-        "application/vnd.ms-excel",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      ];
-      if (!allowedTypes.includes(droppedFile.type)) {
-        alert("Only PDF and Excel files are allowed");
-        return;
-      }
-
-      setPaymentFile(droppedFile);
-    }
-  };
-
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted:", { formData, billFile, paymentFile });
-    alert("Order added successfully!");
-    router.push("/orders");
+    if (!isFormValid() || submitting || isUploadingAny) return;
+
+    try {
+      setSubmitting(true);
+      setError("");
+
+      await addOrder({
+        orderId: formData.orderId,
+        date: formData.date,
+        deliveryDate: formData.deliveryDate,
+        customerName: formData.customerName,
+        totalAmount: Number(formData.amount) || 0,
+        paymentMode: formData.paymentMode,
+        status: formData.orderStatus,
+        billAttachment: billAttachmentUrl,
+        paymentAttachment: paymentAttachmentUrl,
+      });
+
+      router.push("/orders");
+    } catch (err) {
+      console.error("Failed to add order:", err);
+      setError(err.message || "Failed to save order to database.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  // Handle cancel
   const handleCancel = () => {
     router.push("/orders");
   };
 
-  // Check if all required fields are filled
   const isFormValid = () => {
     return (
       formData.date !== null &&
@@ -210,9 +114,9 @@ const AddOrdersPage = () => {
   };
 
   return (
-    <div className="w-full flex flex-col">
-      {/* Sticky Header with Breadcrumb Navigation and Action Buttons */}
-      <div className="mb-6 min-w-0">
+    <PermissionGuard moduleKey="orders" requiredAction="manage">
+      <div className="w-full flex flex-col">
+        <div className="mb-6 min-w-0">
         <div className="flex items-center justify-between min-w-0">
           <div className="flex items-center gap-2 text-text-primary min-w-0 flex-1">
             <button
@@ -234,7 +138,6 @@ const AddOrdersPage = () => {
             </h1>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex items-center gap-1.5 sm:gap-2 md:gap-4 flex-shrink-0 ml-2">
             <button
               type="button"
@@ -246,44 +149,51 @@ const AddOrdersPage = () => {
             <button
               type="submit"
               form="add-order-form"
-              disabled={!isFormValid()}
+              disabled={!isFormValid() || submitting || isUploadingAny}
               className={`flex items-center gap-1 sm:gap-1.5 md:gap-2 px-1.5 sm:px-2 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-lg transition-colors font-medium text-xs sm:text-sm md:text-base whitespace-nowrap ${
-                isFormValid()
+                isFormValid() && !submitting && !isUploadingAny
                   ? "cursor-pointer bg-accent hover:bg-accent/90 text-white"
-                  : "cursor-not-allowed bg-accent text-white"
+                  : "cursor-not-allowed bg-accent/50 text-white/70"
               }`}
             >
               <LuSave size={16} className="sm:w-[18px] sm:h-[18px]" />
-              <span className="hidden xs:inline">Save Order</span>
-              <span className="xs:hidden">Save</span>
+              <span>
+                {isUploadingAny
+                  ? "Uploading..."
+                  : submitting
+                  ? "Saving..."
+                  : "Save Order"}
+              </span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Form Container - matches table container pattern exactly */}
-      <div className="flex-1 min-h-0 ">
+      {error && (
+        <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/40 text-red-400 text-sm">
+          ⚠️ {error}
+        </div>
+      )}
+
+      <div className="flex-1 min-h-0">
         <div className="bg-secondary rounded-xl p-3 sm:p-4 md:p-6 lg:p-5 flex flex-col h-full">
-          {/* Static Header Section - will NOT scroll */}
           <div className="pb-4">
             <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-text-primary">
-              Add Order
+              Add Order Details
             </h1>
           </div>
 
-          {/* Scrollable Content Area - matches table scrolling behavior */}
           <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar max-h-[650px] md:max-h-[500px] lg:min-h-[450px]">
             <form
               id="add-order-form"
               onSubmit={handleSubmit}
               className="space-y-5 lg:space-y-6 min-w-0"
             >
-              {/* Form Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5 min-w-0">
-                {/* Date Field */}
+                {/* Date */}
                 <div className="space-y-2 min-w-0">
                   <label className="block text-sm font-medium text-text-primary">
-                    Date <span className="text-red-500">*</span>
+                    Order Date <span className="text-red-500">*</span>
                   </label>
                   <CustomDatePicker
                     selected={formData.date}
@@ -294,7 +204,7 @@ const AddOrdersPage = () => {
                   />
                 </div>
 
-                {/* Delivery Date Field */}
+                {/* Delivery Date */}
                 <div className="space-y-2 min-w-0">
                   <label className="block text-sm font-medium text-text-primary">
                     Delivery Date <span className="text-red-500">*</span>
@@ -302,13 +212,13 @@ const AddOrdersPage = () => {
                   <CustomDatePicker
                     selected={formData.deliveryDate}
                     onChange={handleDeliveryDateChange}
-                    placeholder="Enter Date"
+                    placeholder="Enter Delivery Date"
                     dateFormat="dd/MM/yyyy"
                     minDate={new Date()}
                   />
                 </div>
 
-                {/* Order ID Field */}
+                {/* Order ID */}
                 <div className="space-y-2 min-w-0">
                   <label className="block text-sm font-medium text-text-primary">
                     Order ID <span className="text-red-500">*</span>
@@ -318,13 +228,13 @@ const AddOrdersPage = () => {
                     name="orderId"
                     value={formData.orderId}
                     onChange={handleInputChange}
-                    placeholder="Enter Order id"
+                    placeholder="e.g. ID846597"
                     required
                     className="w-full h-11 px-5 py-2.5 bg-form-bg border border-[#545454] rounded-lg text-text-primary placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                   />
                 </div>
 
-                {/* Customer Name Field */}
+                {/* Customer Name */}
                 <div className="space-y-2 min-w-0">
                   <label className="block text-sm font-medium text-text-primary">
                     Customer Name <span className="text-red-500">*</span>
@@ -340,21 +250,22 @@ const AddOrdersPage = () => {
                   />
                 </div>
 
-                {/* Amount Field */}
+                {/* Amount */}
                 <div className="space-y-2 min-w-0">
                   <label className="block text-sm font-medium text-text-primary">
-                    Amount
+                    Total Amount (₹)
                   </label>
                   <input
                     type="number"
                     name="amount"
                     value={formData.amount}
                     onChange={handleInputChange}
-                    placeholder="Enter Amount"
+                    placeholder="Enter Order Amount"
                     className="w-full h-11 px-5 py-2.5 bg-form-bg border border-[#545454] rounded-lg text-text-primary placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                   />
                 </div>
-                {/* Order Status Dropdown */}
+
+                {/* Order Status */}
                 <div className="space-y-2 min-w-0">
                   <label className="block text-sm font-medium text-text-primary">
                     Order Status <span className="text-red-500">*</span>
@@ -369,7 +280,7 @@ const AddOrdersPage = () => {
                   />
                 </div>
 
-                {/* Payment Mode Dropdown */}
+                {/* Payment Mode */}
                 <div className="space-y-2 min-w-0">
                   <label className="block text-sm font-medium text-text-primary">
                     Payment Mode <span className="text-red-500">*</span>
@@ -385,102 +296,37 @@ const AddOrdersPage = () => {
                 </div>
               </div>
 
-              {/* File Upload Sections */}
+              {/* Attachments Section with live upload loading status */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5 min-w-0 mt-6">
-                {/* Upload Bill Attachment File */}
-                <div className="space-y-2 min-w-0">
-                  <label className="block text-sm font-medium text-text-primary">
-                    Upload Bill Attachment File
-                  </label>
-                  <div
-                    className={`relative w-full h-24 lg:h-[98px] border-2 border-dashed rounded-lg transition-colors ${
-                      billDragActive
-                        ? "border-accent bg-accent/10"
-                        : "border-[#545454] hover:border-gray-400"
-                    } ${billFile ? "bg-accent/5" : ""}`}
-                    onDragEnter={handleBillDrag}
-                    onDragLeave={handleBillDrag}
-                    onDragOver={handleBillDrag}
-                    onDrop={handleBillDrop}
-                  >
-                    <input
-                      type="file"
-                      accept=".pdf,.xls,.xlsx"
-                      onChange={handleBillFileChange}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    />
-                    <div className="flex flex-col items-center justify-center h-full text-center p-4">
-                      <LuUpload className="w-6 h-6 text-accent mb-2" />
-                      <p className="text-sm text-gray-300">
-                        <span className="text-accent cursor-pointer hover:underline">
-                          Choose File
-                        </span>{" "}
-                        / Drag and Drop Files Here
-                      </p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        Supported File Type: Excel, pdf • Max. File Size: 12MB
-                      </p>
-                    </div>
-                    {billFile && (
-                      <div className="absolute bottom-2 left-2 right-2 bg-primary rounded px-2 py-1">
-                        <p className="text-xs text-text-primary truncate">
-                          {billFile.name}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                {/* Bill Attachment */}
+                <AttachmentUploader
+                  label="Bill Attachment"
+                  value={billAttachmentUrl}
+                  onChange={(url) => setBillAttachmentUrl(url)}
+                  onUploadStateChange={setIsUploadingBill}
+                  accept=".pdf,.xls,.xlsx,.png,.jpg,.jpeg"
+                  helpText="Supported: PDF, Excel, PNG, JPG • Max 12MB"
+                  placeholderText="Upload Bill / Drag & Drop"
+                />
 
-                {/* Upload Payment Attachment File */}
-                <div className="space-y-2 min-w-0">
-                  <label className="block text-sm font-medium text-text-primary">
-                    Upload Payment Attachment File
-                  </label>
-                  <div
-                    className={`relative w-full h-24 lg:h-[98px] border-2 border-dashed rounded-lg transition-colors ${
-                      paymentDragActive
-                        ? "border-accent bg-accent/10"
-                        : "border-[#545454] hover:border-gray-400"
-                    } ${paymentFile ? "bg-accent/5" : ""}`}
-                    onDragEnter={handlePaymentDrag}
-                    onDragLeave={handlePaymentDrag}
-                    onDragOver={handlePaymentDrag}
-                    onDrop={handlePaymentDrop}
-                  >
-                    <input
-                      type="file"
-                      accept=".pdf,.xls,.xlsx"
-                      onChange={handlePaymentFileChange}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    />
-                    <div className="flex flex-col items-center justify-center h-full text-center p-4">
-                      <LuUpload className="w-6 h-6 text-accent mb-2" />
-                      <p className="text-sm text-gray-300">
-                        <span className="text-accent cursor-pointer hover:underline">
-                          Choose File
-                        </span>{" "}
-                        / Drag and Drop Files Here
-                      </p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        Supported File Type: Excel, pdf • Max. File Size: 12MB
-                      </p>
-                    </div>
-                    {paymentFile && (
-                      <div className="absolute bottom-2 left-2 right-2 bg-primary rounded px-2 py-1">
-                        <p className="text-xs text-text-primary truncate">
-                          {paymentFile.name}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                {/* Payment Attachment */}
+                <AttachmentUploader
+                  label="Payment Receipt Attachment"
+                  value={paymentAttachmentUrl}
+                  onChange={(url) => setPaymentAttachmentUrl(url)}
+                  onUploadStateChange={setIsUploadingPayment}
+                  accept=".pdf,.xls,.xlsx,.png,.jpg,.jpeg"
+                  helpText="Supported: PDF, Receipt, PNG, JPG • Max 12MB"
+                  placeholderText="Upload Payment Receipt / Drag & Drop"
+                />
               </div>
             </form>
           </div>
         </div>
       </div>
     </div>
-  );
+  </PermissionGuard>
+);
 };
 
 export default AddOrdersPage;

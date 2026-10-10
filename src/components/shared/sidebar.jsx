@@ -3,8 +3,9 @@ import React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSidebar } from "../../contexts/SidebarContext";
+import { useAuth } from "../../contexts/AuthContext";
 import { PiChartBarBold, PiSuitcaseSimpleBold } from "react-icons/pi";
-import { LuWallet, LuUser } from "react-icons/lu";
+import { LuWallet, LuUser, LuLayers } from "react-icons/lu";
 import { BsBoxSeam } from "react-icons/bs";
 import { BiLogOut } from "react-icons/bi";
 import { RiMenuUnfold2Line, RiMenuFold2Line } from "react-icons/ri";
@@ -13,8 +14,9 @@ const Sidebar = ({ isExpanded, setIsExpanded, isMobile }) => {
   const pathname = usePathname();
   const router = useRouter();
   const { closeSidebar, isClient } = useSidebar();
+  const { logout, canAccess } = useAuth();
 
-  const menuItems = [
+  const allMenuItems = [
     {
       name: "Dashboard",
       icon: PiChartBarBold,
@@ -26,26 +28,42 @@ const Sidebar = ({ isExpanded, setIsExpanded, isMobile }) => {
       icon: LuWallet,
       path: "/(main)/sales",
       url: "/sales",
+      moduleKey: "sales",
     },
     {
       name: "Orders",
       icon: BsBoxSeam,
       path: "/(main)/orders",
       url: "/orders",
+      moduleKey: "orders",
     },
     {
       name: "Expenses",
       icon: PiSuitcaseSimpleBold,
       path: "/(main)/expenses",
       url: "/expenses",
+      moduleKey: "expenses",
+    },
+    {
+      name: "Categories",
+      icon: LuLayers,
+      path: "/(main)/manage-categories",
+      url: "/manage-categories",
+      moduleKey: "categories",
     },
     {
       name: "User Management",
       icon: LuUser,
       path: "/(main)/user-management",
       url: "/user-management",
+      moduleKey: "userManagement",
     },
   ];
+
+  const menuItems = allMenuItems.filter((item) => {
+    if (!item.moduleKey) return true;
+    return typeof canAccess === "function" ? canAccess(item.moduleKey) : true;
+  });
 
   const toggleSidebar = () => {
     setIsExpanded(!isExpanded);
@@ -202,7 +220,8 @@ const Sidebar = ({ isExpanded, setIsExpanded, isMobile }) => {
       <div className="p-2 border-t border-gray-600">
         <div className="relative group">
           <button
-            className={`nav-link flex items-center w-full h-11 px-2 py-1 rounded-lg text-text-primary hover:bg-hover hover:text-white focus:bg-hover focus:text-white`}
+            onClick={logout}
+            className={`nav-link flex items-center w-full h-11 px-2 py-1 rounded-lg text-text-primary hover:bg-hover hover:text-white focus:bg-hover focus:text-white cursor-pointer`}
           >
             <BiLogOut size={20} className="flex-shrink-0" />
             {isExpanded && (

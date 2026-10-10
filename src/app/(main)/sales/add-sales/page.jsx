@@ -2,16 +2,20 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LuUpload, LuSave, LuArrowLeft } from "react-icons/lu";
+import { LuSave, LuArrowLeft } from "react-icons/lu";
 import { MdKeyboardArrowRight } from "react-icons/md";
 import CustomDatePicker from "../../../../components/ui/CustomDatePicker";
+import AttachmentUploader from "../../../../components/ui/AttachmentUploader";
+import PermissionGuard from "../../../../components/shared/PermissionGuard";
+import { useData } from "../../../../contexts/DataContext";
 
 const AddSalesPage = () => {
   const router = useRouter();
+  const { addSale } = useData();
 
   // Form state
   const [formData, setFormData] = useState({
-    date: null,
+    date: new Date(),
     openingCash: "",
     purchaseCash: "",
     onlineCash: "",
@@ -21,16 +25,26 @@ const AddSalesPage = () => {
     totalSale: "",
   });
 
-  const [file, setFile] = useState(null);
-  const [dragActive, setDragActive] = useState(false);
+  const [attachmentUrl, setAttachmentUrl] = useState(null);
+  const [isUploadingAttachment, setIsUploadingAttachment] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => {
+      const updated = { ...prev, [name]: value };
+
+      // Automatically calculate totalSale when online or physical cash changes if user hasn't overridden
+      if (name === "onlineCash" || name === "physicalCash") {
+        const online = name === "onlineCash" ? Number(value) || 0 : Number(prev.onlineCash) || 0;
+        const physical = name === "physicalCash" ? Number(value) || 0 : Number(prev.physicalCash) || 0;
+        updated.totalSale = (online + physical).toString();
+      }
+
+      return updated;
+    });
   };
 
   // Handle date change
@@ -41,102 +55,56 @@ const AddSalesPage = () => {
     }));
   };
 
-  // Handle file upload
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      if (selectedFile.size > 10 * 1024 * 1024) {
-        // 10MB limit
-        alert("File size must be less than 10MB");
-        return;
-      }
-
-      const allowedTypes = [
-        "application/pdf",
-        "application/msword",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "image/png",
-        "image/jpeg",
-      ];
-      if (!allowedTypes.includes(selectedFile.type)) {
-        alert("Only PDF, Word, PNG, and JPG files are allowed");
-        return;
-      }
-
-      setFile(selectedFile);
-    }
-  };
-
-  // Handle drag and drop
-  const handleDrag = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const droppedFile = e.dataTransfer.files[0];
-      if (droppedFile.size > 10 * 1024 * 1024) {
-        alert("File size must be less than 10MB");
-        return;
-      }
-
-      const allowedTypes = [
-        "application/pdf",
-        "application/msword",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "image/png",
-        "image/jpeg",
-      ];
-      if (!allowedTypes.includes(droppedFile.type)) {
-        alert("Only PDF, Word, PNG, and JPG files are allowed");
-        return;
-      }
-
-      setFile(droppedFile);
-    }
-  };
-
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Here you would typically send the data to your API
-    console.log("Form submitted:", { formData, file });
-    // For now, just show a success message and redirect
-    alert("Sale added successfully!");
-    router.push("/sales");
+    if (!isFormValid() || submitting || isUploadingAttachment) return;
+
+    try {
+      setSubmitting(true);
+      setError("");
+
+      await addSale({
+        date: formData.date,
+        openingCash: formData.openingCash,
+        purchaseCash: formData.purchaseCash,
+        onlineCash: formData.onlineCash,
+        physicalCash: formData.physicalCash,
+        cashTransferred: formData.cashTransferred,
+        closingCash: formData.closingCash,
+        totalSale: formData.totalSale,
+        attachment: attachmentUrl,
+      });
+
+      router.push("/sales");
+    } catch (err) {
+      console.error("Failed to add sale:", err);
+      setError(err.message || "Failed to save sale. Please check MongoDB connection.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  // Handle cancel
   const handleCancel = () => {
     router.push("/sales");
   };
 
-  // Check if all required fields are filled
   const isFormValid = () => {
     return (
       formData.date !== null &&
-      formData.openingCash.trim() !== "" &&
-      formData.purchaseCash.trim() !== "" &&
-      formData.onlineCash.trim() !== "" &&
-      formData.physicalCash.trim() !== "" &&
-      formData.cashTransferred.trim() !== "" &&
-      formData.closingCash.trim() !== "" &&
-      formData.totalSale.trim() !== ""
+      formData.openingCash.toString().trim() !== "" &&
+      formData.purchaseCash.toString().trim() !== "" &&
+      formData.onlineCash.toString().trim() !== "" &&
+      formData.physicalCash.toString().trim() !== "" &&
+      formData.cashTransferred.toString().trim() !== "" &&
+      formData.closingCash.toString().trim() !== "" &&
+      formData.totalSale.toString().trim() !== ""
     );
   };
 
   return (
-    <div className="w-full flex flex-col">
+    <PermissionGuard moduleKey="sales" requiredAction="manage">
+      <div className="w-full flex flex-col">
       {/* Sticky Header with Breadcrumb Navigation and Action Buttons */}
       <div className="mb-6 min-w-0">
         <div className="flex items-center justify-between min-w-0">
@@ -172,39 +140,47 @@ const AddSalesPage = () => {
             <button
               type="submit"
               form="add-sale-form"
-              disabled={!isFormValid()}
+              disabled={!isFormValid() || submitting || isUploadingAttachment}
               className={`flex items-center gap-1 sm:gap-1.5 md:gap-2 px-1.5 sm:px-2 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-lg transition-colors font-medium text-xs sm:text-sm md:text-base whitespace-nowrap ${
-                isFormValid()
+                isFormValid() && !submitting && !isUploadingAttachment
                   ? "cursor-pointer bg-accent hover:bg-accent/90 text-white"
-                  : "cursor-not-allowed bg-accent text-white"
+                  : "cursor-not-allowed bg-accent/50 text-white/70"
               }`}
             >
               <LuSave size={16} className="sm:w-[18px] sm:h-[18px]" />
-              <span className="hidden xs:inline">Save Sale</span>
-              <span className="xs:hidden">Save</span>
+              <span>
+                {isUploadingAttachment
+                  ? "Uploading..."
+                  : submitting
+                  ? "Saving..."
+                  : "Save Sale"}
+              </span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Form Container - matches table container pattern exactly */}
-      <div className="flex-1 min-h-0 ">
+      {error && (
+        <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/40 text-red-400 text-sm">
+          ⚠️ {error}
+        </div>
+      )}
+
+      {/* Form Container */}
+      <div className="flex-1 min-h-0">
         <div className="bg-secondary rounded-xl p-3 sm:p-4 md:p-6 lg:p-5 flex flex-col h-full">
-          {/* Static Header Section - will NOT scroll */}
           <div className="pb-4">
             <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-text-primary">
-              Add Sale
+              Add Sale Details
             </h1>
           </div>
 
-          {/* Scrollable Content Area - matches table scrolling behavior */}
           <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar max-h-[650px] md:max-h-[500px] lg:max-h-[510px]">
             <form
               id="add-sale-form"
               onSubmit={handleSubmit}
               className="space-y-5 lg:space-y-6 min-w-0"
             >
-              {/* Form Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5 min-w-0">
                 {/* Date Field */}
                 <div className="space-y-2 min-w-0">
@@ -220,182 +196,138 @@ const AddSalesPage = () => {
                   />
                 </div>
 
-                {/* Opening Cash Field */}
+                {/* Opening Cash */}
                 <div className="space-y-2 min-w-0">
                   <label className="block text-sm font-medium text-text-primary">
-                    Opening Cash <span className="text-red-500">*</span>
+                    Opening Cash (₹) <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
                     name="openingCash"
                     value={formData.openingCash}
                     onChange={handleInputChange}
-                    placeholder="Enter Amount"
+                    placeholder="Enter Opening Amount"
                     required
                     className="w-full h-10 sm:h-11 px-3 sm:px-5 py-2 sm:py-2.5 bg-form-bg border border-[#545454] rounded-lg text-text-primary placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                   />
                 </div>
 
-                {/* Purchase Cash Field */}
+                {/* Purchase Cash */}
                 <div className="space-y-2 min-w-0">
                   <label className="block text-sm font-medium text-text-primary">
-                    Purchase Cash <span className="text-red-500">*</span>
+                    Purchase Cash (₹) <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
                     name="purchaseCash"
                     value={formData.purchaseCash}
                     onChange={handleInputChange}
-                    placeholder="Enter Amount"
+                    placeholder="Enter Purchase Amount"
                     required
                     className="w-full h-10 sm:h-11 px-3 sm:px-5 py-2 sm:py-2.5 bg-form-bg border border-[#545454] rounded-lg text-text-primary placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                   />
                 </div>
 
-                {/* Online Cash Field */}
+                {/* Online Cash */}
                 <div className="space-y-2 min-w-0">
                   <label className="block text-sm font-medium text-text-primary">
-                    Online Cash <span className="text-red-500">*</span>
+                    Online Cash (₹) <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
                     name="onlineCash"
                     value={formData.onlineCash}
                     onChange={handleInputChange}
-                    placeholder="Enter Amount"
+                    placeholder="Enter Online Payment Amount"
                     required
                     className="w-full h-10 sm:h-11 px-3 sm:px-5 py-2 sm:py-2.5 bg-form-bg border border-[#545454] rounded-lg text-text-primary placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                   />
                 </div>
 
-                {/* Physical Cash Field */}
+                {/* Physical Cash */}
                 <div className="space-y-2 min-w-0">
                   <label className="block text-sm font-medium text-text-primary">
-                    Physical Cash <span className="text-red-500">*</span>
+                    Physical Cash (₹) <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
                     name="physicalCash"
                     value={formData.physicalCash}
                     onChange={handleInputChange}
-                    placeholder="Enter Amount"
+                    placeholder="Enter Physical Cash Amount"
                     required
                     className="w-full h-10 sm:h-11 px-3 sm:px-5 py-2 sm:py-2.5 bg-form-bg border border-[#545454] rounded-lg text-text-primary placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                   />
                 </div>
 
-                {/* Cash Transferred Field */}
+                {/* Cash Transferred */}
                 <div className="space-y-2 min-w-0">
                   <label className="block text-sm font-medium text-text-primary">
-                    Cash Transferred <span className="text-red-500">*</span>
+                    Cash Transferred (₹) <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
                     name="cashTransferred"
                     value={formData.cashTransferred}
                     onChange={handleInputChange}
-                    placeholder="Enter Amount"
+                    placeholder="Enter Transferred Amount"
                     required
                     className="w-full h-10 sm:h-11 px-3 sm:px-5 py-2 sm:py-2.5 bg-form-bg border border-[#545454] rounded-lg text-text-primary placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                   />
                 </div>
 
-                {/* Closing Cash Field */}
+                {/* Closing Cash */}
                 <div className="space-y-2 min-w-0">
                   <label className="block text-sm font-medium text-text-primary">
-                    Closing Cash <span className="text-red-500">*</span>
+                    Closing Cash (₹) <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
                     name="closingCash"
                     value={formData.closingCash}
                     onChange={handleInputChange}
-                    placeholder="Enter Amount"
+                    placeholder="Enter Closing Cash Amount"
                     required
                     className="w-full h-10 sm:h-11 px-3 sm:px-5 py-2 sm:py-2.5 bg-form-bg border border-[#545454] rounded-lg text-text-primary placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                   />
                 </div>
 
-                {/* Total Sale Field */}
+                {/* Total Sale */}
                 <div className="space-y-2 min-w-0">
                   <label className="block text-sm font-medium text-text-primary">
-                    Total Sale <span className="text-red-500">*</span>
+                    Total Sale (₹) <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
                     name="totalSale"
                     value={formData.totalSale}
                     onChange={handleInputChange}
-                    placeholder="Enter Amount"
+                    placeholder="Enter Total Sale Amount"
                     required
                     className="w-full h-10 sm:h-11 px-3 sm:px-5 py-2 sm:py-2.5 bg-form-bg border border-[#545454] rounded-lg text-text-primary placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                   />
                 </div>
               </div>
 
-              {/* File Upload Section */}
-              <div className="space-y-2 mt-6 min-w-0">
-                <label className="block text-sm font-medium text-text-primary">
-                  Upload File
-                </label>
-                <div
-                  className={`relative w-full h-24 lg:h-[98px] border-2 border-dashed rounded-lg transition-colors ${
-                    dragActive
-                      ? "border-accent bg-accent/10"
-                      : "border-[#545454] hover:border-gray-400"
-                  } ${file ? "bg-accent/5" : ""}`}
-                  onDragEnter={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDragOver={handleDrag}
-                  onDrop={handleDrop}
-                >
-                  <input
-                    type="file"
-                    onChange={handleFileChange}
-                    accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  />
-                  <div className="flex flex-col items-center justify-center h-full px-6 text-center">
-                    <LuUpload className="w-6 h-6 text-gray-400 mb-2" />
-                    {file ? (
-                      <div className="text-text-primary">
-                        <p className="font-medium">{file.name}</p>
-                        <p className="text-sm text-gray-400">
-                          {(file.size / (1024 * 1024)).toFixed(2)} MB
-                        </p>
-                      </div>
-                    ) : (
-                      <>
-                        <p className="text-text-primary font-medium">
-                          Drag and Drop Files Here /{" "}
-                          <span className="text-accent cursor-pointer underline">
-                            Choose File
-                          </span>
-                        </p>
-                        <p className="text-sm text-gray-400 mt-1">
-                          Supported File Type: PDF, Word, PNG, JPG &nbsp;&nbsp;
-                          Max. File Size: 10MB
-                        </p>
-                      </>
-                    )}
-                  </div>
-                </div>
-                {file && (
-                  <button
-                    type="button"
-                    onClick={() => setFile(null)}
-                    className="text-red-500 text-sm hover:text-red-400 transition-colors"
-                  >
-                    Remove file
-                  </button>
-                )}
+              {/* Attachment Section with live upload loading status */}
+              <div className="mt-6 min-w-0">
+                <AttachmentUploader
+                  label="Upload Attachment (Receipt / Bill)"
+                  value={attachmentUrl}
+                  onChange={(url) => setAttachmentUrl(url)}
+                  onUploadStateChange={setIsUploadingAttachment}
+                  accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                  helpText="Supported: PDF, Word, PNG, JPG • Max 12MB"
+                  placeholderText="Drag and Drop Attachment Here / Choose File"
+                />
               </div>
             </form>
           </div>
         </div>
       </div>
     </div>
-  );
+  </PermissionGuard>
+);
 };
 
 export default AddSalesPage;

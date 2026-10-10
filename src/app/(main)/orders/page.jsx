@@ -7,18 +7,17 @@ import OrdersTable from "../../../components/orders/OrdersTable";
 import OrdersTableSkeleton from "../../../components/orders/OrdersTableSkeleton";
 import StatusFilter from "../../../components/orders/StatusFilter";
 import { useData } from "../../../contexts/DataContext";
+import { useAuth } from "../../../contexts/AuthContext";
+import PermissionGuard from "../../../components/shared/PermissionGuard";
 
 const OrdersPage = () => {
   const router = useRouter();
-  const { orders } = useData();
-  const [filteredData, setFilteredData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedStatus, setSelectedStatus] = useState("All");
+  const { orders, loading } = useData();
+  const { canManage } = useAuth();
+  const canManageOrders = typeof canManage === "function" ? canManage("orders") : true;
 
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 800);
-    return () => clearTimeout(timer);
-  }, []);
+  const [filteredData, setFilteredData] = useState([]);
+  const [selectedStatus, setSelectedStatus] = useState("All");
 
   useEffect(() => {
     if (selectedStatus === "All") {
@@ -37,46 +36,52 @@ const OrdersPage = () => {
   };
 
   return (
-    <div className="w-full max-w-full">
-      <div className="mb-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-text-primary">Orders</h1>
-          <div className="hidden md:flex items-center space-x-4">
+    <PermissionGuard moduleKey="orders" requiredAction="view">
+      <div className="w-full max-w-full">
+        <div className="mb-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold text-text-primary">Orders</h1>
+            <div className="hidden md:flex items-center space-x-4">
+              <StatusFilter
+                selectedStatus={selectedStatus}
+                onStatusChange={handleStatusChange}
+              />
+              {canManageOrders && (
+                <button
+                  onClick={handleAddOrder}
+                  className="flex items-center space-x-2 px-6 py-2.5 bg-accent cursor-pointer hover:bg-accent/90 text-white rounded-lg transition-colors font-medium"
+                >
+                  <LuPlus size={18} />
+                  <span>Add Order</span>
+                </button>
+              )}
+            </div>
+            {canManageOrders && (
+              <button
+                onClick={handleAddOrder}
+                className="md:hidden flex items-center space-x-2 px-2 py-2.5 bg-accent hover:bg-accent/90 text-white rounded-lg transition-colors font-medium text-sm"
+              >
+                <LuPlus size={18} />
+                <span>Add Order</span>
+              </button>
+            )}
+          </div>
+          <div className="md:hidden flex items-center justify-start">
             <StatusFilter
               selectedStatus={selectedStatus}
               onStatusChange={handleStatusChange}
             />
-            <button
-              onClick={handleAddOrder}
-              className="flex items-center space-x-2 px-6 py-2.5 bg-accent cursor-pointer hover:bg-accent/90 text-white rounded-lg transition-colors font-medium"
-            >
-              <LuPlus size={18} />
-              <span>Add Order</span>
-            </button>
           </div>
-          <button
-            onClick={handleAddOrder}
-            className="md:hidden flex items-center space-x-2 px-2 py-2.5 bg-accent hover:bg-accent/90 text-white rounded-lg transition-colors font-medium text-sm"
-          >
-            <LuPlus size={18} />
-            <span>Add Order</span>
-          </button>
         </div>
-        <div className="md:hidden flex items-center justify-start">
-          <StatusFilter
-            selectedStatus={selectedStatus}
-            onStatusChange={handleStatusChange}
-          />
+        <div className="flex-1 min-h-0">
+          {loading ? (
+            <OrdersTableSkeleton />
+          ) : (
+            <OrdersTable ordersData={filteredData} canManage={canManageOrders} />
+          )}
         </div>
       </div>
-      <div className="bg-secondary shadow-md rounded-xl p-2 sm:p-4 md:p-5 lg:p-6 space-y-2 overflow-hidden w-full">
-        {loading ? (
-          <OrdersTableSkeleton />
-        ) : (
-          <OrdersTable ordersData={filteredData} />
-        )}
-      </div>
-    </div>
+    </PermissionGuard>
   );
 };
 

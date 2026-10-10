@@ -21,86 +21,87 @@ const DashboardCard = ({
     return val;
   };
 
-  const getTrendColor = () => {
-    if (!trend) return "";
-    return trend === "up" ? "text-green" : "text-red";
-  };
-
-  const getTrendIcon = () => {
-    if (!trend) return null;
-    return trend === "up" ? (
-      <VscTriangleUp size={12} className="text-green" />
-    ) : (
-      <VscTriangleDown size={12} className="text-red" />
+  const getTrendBadge = () => {
+    if (!trend || !trendValue) return null;
+    const isUp = trend === "up";
+    return (
+      <div
+        className={`flex items-center rounded-full px-2.5 py-0.5 gap-1 text-xs font-semibold border ${
+          isUp
+            ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+            : "bg-rose-500/15 text-rose-400 border-rose-500/30"
+        }`}
+      >
+        {isUp ? (
+          <VscTriangleUp size={11} className="text-emerald-400" />
+        ) : (
+          <VscTriangleDown size={11} className="text-rose-400" />
+        )}
+        <span>{trendValue}</span>
+      </div>
     );
   };
 
   return (
     <div
       className={`
-        w-full lg:w-auto lg:min-w-[270px] lg:max-w-[280px]
-        min-h-[155px] lg:h-[155px]
-        h-auto
-        bg-secondary 
-        rounded-[20px] 
-        p-3 sm:p-4 lg:p-3
+        w-full
+        min-h-[160px]
+        bg-secondary/90
+        backdrop-blur-md
+        rounded-2xl sm:rounded-3xl
+        p-4 sm:p-5
         flex flex-col 
-        gap-4 
-        shadow-lg
+        justify-between
+        gap-3 sm:gap-4
+        shadow-xl
+        border border-[#545454]/40
+        hover:border-accent/50
         transition-all duration-300 ease-in-out
+        hover:translate-y-[-2px]
         ${className}
       `}
     >
-      {/* Header with Icon */}
-      <div className="flex items-start justify-between">
+      {/* Header with Icon & Trend */}
+      <div className="flex items-center justify-between">
         {/* Icon Container */}
         <div
           className={`
-            w-10 h-10 sm:w-12 sm:h-12 lg:w-10 lg:h-10
+            w-11 h-11 sm:w-12 sm:h-12
             ${iconBgColor} 
-            rounded-[25.33px] 
+            rounded-2xl 
             flex items-center justify-center 
-            p-2
+            p-2.5
+            shadow-md
             transition-all duration-300 ease-in-out
           `}
         >
           {icon &&
             React.cloneElement(icon, {
               size: 24,
-              className: `${iconColor} sm:scale-110 lg:scale-100 transition-transform duration-300`,
+              className: `${iconColor} transition-transform duration-300`,
             })}
         </div>
+
+        {/* Trend Indicator in top-right */}
+        {getTrendBadge()}
       </div>
 
       {/* Card Data Container */}
-      <div className="flex flex-col gap-1 flex-1">
+      <div className="flex flex-col gap-1.5 flex-1 justify-end">
         {/* Title */}
-        <h3 className="text-sm sm:text-base lg:text-sm font-medium text-text-primary leading-tight">
+        <h3 className="text-xs sm:text-sm font-medium text-text-primary/70 leading-tight">
           {title}
         </h3>
 
-        {/* Value with Trend */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <div
-            className={`text-xl sm:text-2xl lg:text-2xl font-bold ${valueColor} leading-tight`}
-          >
-            {formatValue(value)}
-          </div>
-
-          {/* Trend Indicator */}
-          {trend && trendValue && (
-            <div
-              className={`flex items-center bg-black rounded-[15px] px-2 py-0.5 gap-1 ${getTrendColor()}`}
-            >
-              {getTrendIcon()}
-              <span className="text-sm font-medium">{trendValue}</span>
-            </div>
-          )}
+        {/* Value */}
+        <div className={`text-xl sm:text-2xl font-bold ${valueColor} tracking-tight leading-tight`}>
+          {formatValue(value)}
         </div>
 
         {/* Subtitle */}
         {subtitle && (
-          <p className="text-xs sm:text-sm lg:text-xs text-text-primary leading-tight mt-1">
+          <p className="text-[11px] sm:text-xs text-text-primary/60 leading-tight truncate">
             {subtitle}
           </p>
         )}

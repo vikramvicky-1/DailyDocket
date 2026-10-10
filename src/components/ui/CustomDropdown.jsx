@@ -11,6 +11,7 @@ const CustomDropdown = ({
   required = false,
   name = "",
   className = "",
+  disabled = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
@@ -19,7 +20,7 @@ const CustomDropdown = ({
   // Find selected option based on value
   useEffect(() => {
     const option = options.find((opt) => opt.value === value);
-    setSelectedOption(option || null);
+    setSelectedOption(option || (value ? { value, label: value } : null));
   }, [value, options]);
 
   // Close dropdown when clicking outside
@@ -35,10 +36,12 @@ const CustomDropdown = ({
   }, []);
 
   const handleToggle = () => {
+    if (disabled) return;
     setIsOpen(!isOpen);
   };
 
   const handleOptionSelect = (option) => {
+    if (disabled) return;
     setSelectedOption(option);
     setIsOpen(false);
 
@@ -53,6 +56,7 @@ const CustomDropdown = ({
   };
 
   const handleKeyDown = (e) => {
+    if (disabled) return;
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       handleToggle();
@@ -68,13 +72,18 @@ const CustomDropdown = ({
 
       {/* Dropdown Trigger */}
       <div
-        className="w-full h-11 px-5 py-2.5 bg-form-bg border border-[#545454] rounded-lg text-text-primary focus-within:border-accent focus-within:ring-1 focus-within:ring-accent transition-colors cursor-pointer flex items-center justify-between min-w-0"
+        className={`w-full h-11 px-5 py-2.5 bg-form-bg border rounded-lg text-text-primary transition-colors flex items-center justify-between min-w-0 ${
+          disabled
+            ? "border-gray-700/60 bg-form-bg/40 opacity-50 cursor-not-allowed select-none"
+            : "border-[#545454] focus-within:border-accent focus-within:ring-1 focus-within:ring-accent cursor-pointer"
+        }`}
         onClick={handleToggle}
         onKeyDown={handleKeyDown}
-        tabIndex={0}
+        tabIndex={disabled ? -1 : 0}
         role="button"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
+        aria-disabled={disabled}
       >
         <span
           className={`truncate flex-1 ${
